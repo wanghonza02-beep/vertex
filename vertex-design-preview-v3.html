@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Vertex — Design Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Italiana&family=Orbitron:wght@700;900&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0B0C0E;
+    --graphite: #1A1C1F;
+    --gold: #C9A66B;
+    --brass: #8C7248;
+    --paper: #EDE8DD;
+    --blueline: #2E3B47;
+    --red: #C1272D;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--black);
+    color: var(--paper);
+    font-family: 'IBM Plex Sans', sans-serif;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 60px 40px 100px; }
+
+  /* LOGO */
+  .logo-row { display: flex; align-items: center; gap: 60px; margin-bottom: 70px; flex-wrap: wrap; }
+  .mark { width: 90px; height: 90px; }
+  .mark-small { width: 40px; height: 40px; }
+  .wordmark-row { display: flex; align-items: center; gap: 22px; }
+  .wordmark { font-family: 'Italiana', serif; font-weight: 400; font-size: 36px; letter-spacing: 0.12em; color: var(--paper); }
+  .badge {
+    width: 90px; height: 90px; border-radius: 50%;
+    border: 1px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .badge .mark-small { width: 34px; height: 34px; }
+
+  /* HERO */
+  .hero { border-top: 1px solid var(--blueline); border-bottom: 1px solid var(--blueline); padding: 60px 0; margin-bottom: 60px; position: relative; }
+  .eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.15em; color: var(--gold); text-transform: uppercase; margin-bottom: 18px; }
+  .headline { margin: 0 0 24px; }
+  .headline .line-luxury { display: block; font-family: 'Italiana', serif; font-weight: 400; font-size: 66px; line-height: 1.1; color: var(--paper); letter-spacing: 0.01em; }
+  .headline .line-tech { display: block; font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 52px; line-height: 1.15; color: var(--gold); letter-spacing: 0.02em; margin-top: 8px; }
+  .subtitle { font-family: 'IBM Plex Sans', sans-serif; font-weight: 400; font-size: 19px; line-height: 1.6; color: #B9B4A7; max-width: 560px; margin: 0 0 34px; }
+  .cta-row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  .cta { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--black); background: var(--gold); padding: 14px 28px; border-radius: 0; }
+  .tag-rare { display: inline-flex; align-items: center; gap: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--red); border: 1px solid var(--red); padding: 12px 18px; }
+  .tag-rare::before { content: ''; width: 6px; height: 6px; background: var(--red); border-radius: 50%; }
+
+  /* SPEC NUMBERS - signature element */
+  .specs { display: flex; gap: 70px; margin-bottom: 70px; flex-wrap: wrap; }
+  .spec { position: relative; padding-left: 22px; }
+  .spec::before {
+    content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 1px; background: var(--gold);
+  }
+  .spec-num { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 44px; letter-spacing: -0.02em; color: var(--paper); }
+  .spec-num.gold { color: var(--gold); }
+  .spec-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brass); margin-top: 6px; }
+
+  /* PALETTE */
+  h2.section-title { font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); border-bottom: 1px solid var(--blueline); padding-bottom: 14px; margin: 70px 0 24px; }
+  .palette { display: flex; gap: 0; border: 1px solid var(--blueline); }
+  .swatch { flex: 1; height: 130px; display: flex; align-items: flex-end; padding: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; }
+  .swatch-name { display: block; font-size: 12px; }
+  .swatch-hex { display: block; opacity: 0.7; margin-top: 2px; }
+
+  /* TYPE SAMPLES */
+  .type-sample { border-bottom: 1px solid var(--blueline); padding: 24px 0; display: flex; align-items: baseline; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+  .type-sample .label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--brass); text-transform: uppercase; letter-spacing: 0.1em; width: 160px; flex-shrink: 0; }
+  .t-display { font-family: 'Fraunces', serif; font-size: 40px; color: var(--paper); }
+  .t-body { font-family: 'IBM Plex Sans', sans-serif; font-size: 17px; color: #B9B4A7; max-width: 500px; }
+  .t-mono { font-family: 'IBM Plex Mono', monospace; font-size: 16px; color: var(--gold); letter-spacing: 0.05em; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- LOGO LOCKUPS -->
+  <div class="logo-row">
+    <svg class="mark" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="50,8 92,88 54,88 50,52" fill="#C9A66B"/>
+      <polygon points="50,8 8,88 46,88 50,52" fill="#EDE8DD"/>
+    </svg>
+    <div class="wordmark-row">
+      <svg class="mark-small" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="50,8 92,88 54,88 50,52" fill="#C9A66B"/>
+        <polygon points="50,8 8,88 46,88 50,52" fill="#EDE8DD"/>
+      </svg>
+      <span class="wordmark">VERTEX</span>
+    </div>
+    <div class="badge">
+      <svg class="mark-small" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="50,8 92,88 54,88 50,52" fill="#C9A66B"/>
+        <polygon points="50,8 8,88 46,88 50,52" fill="#EDE8DD"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- HERO SAMPLE -->
+  <div class="hero">
+    <div class="eyebrow">Project 01 — 1989 Porsche 911</div>
+    <h1 class="headline"><span class="line-luxury">Immortal Icons.</span><span class="line-tech">MODERN MUSCLE.</span></h1>
+    <p class="subtitle">We do not build cars. We resurrect legends — the most iconic chassis in automotive history, rebuilt at the exact point where character meets engineering.</p>
+    <div class="cta-row">
+      <span class="cta">View the build</span>
+      <span class="tag-rare">1 of 1 — Ferrari Donor</span>
+    </div>
+  </div>
+
+  <div class="specs">
+    <div class="spec">
+      <div class="spec-num gold">640</div>
+      <div class="spec-label">Power output (hp)</div>
+    </div>
+    <div class="spec">
+      <div class="spec-num">3.2</div>
+      <div class="spec-label">0–100 km/h (sec)</div>
+    </div>
+    <div class="spec">
+      <div class="spec-num">1989</div>
+      <div class="spec-label">Donor year</div>
+    </div>
+  </div>
+
+  <!-- PALETTE -->
+  <h2 class="section-title">Color Palette</h2>
+  <div class="palette">
+    <div class="swatch" style="background:#0B0C0E;">
+      <div><span class="swatch-name" style="color:#EDE8DD">Vertex Black</span><span class="swatch-hex" style="color:#EDE8DD">#0B0C0E</span></div>
+    </div>
+    <div class="swatch" style="background:#1A1C1F;">
+      <div><span class="swatch-name" style="color:#EDE8DD">Graphite</span><span class="swatch-hex" style="color:#EDE8DD">#1A1C1F</span></div>
+    </div>
+    <div class="swatch" style="background:#C9A66B;">
+      <div><span class="swatch-name" style="color:#0B0C0E">Champagne Gold</span><span class="swatch-hex" style="color:#0B0C0E">#C9A66B</span></div>
+    </div>
+    <div class="swatch" style="background:#8C7248;">
+      <div><span class="swatch-name" style="color:#0B0C0E">Aged Brass</span><span class="swatch-hex" style="color:#0B0C0E">#8C7248</span></div>
+    </div>
+    <div class="swatch" style="background:#EDE8DD;">
+      <div><span class="swatch-name" style="color:#0B0C0E">Paper White</span><span class="swatch-hex" style="color:#0B0C0E">#EDE8DD</span></div>
+    </div>
+    <div class="swatch" style="background:#2E3B47;">
+      <div><span class="swatch-name" style="color:#EDE8DD">Blueprint Line</span><span class="swatch-hex" style="color:#EDE8DD">#2E3B47</span></div>
+    </div>
+    <div class="swatch" style="background:#C1272D;">
+      <div><span class="swatch-name" style="color:#EDE8DD">Corsa Red</span><span class="swatch-hex" style="color:#EDE8DD">#C1272D</span></div>
+    </div>
+  </div>
+
+  <!-- RED ACCENT USAGE -->
+  <h2 class="section-title">Corsa Red — Dynamic Accent</h2>
+  <div style="border:1px solid var(--blueline); padding:28px; display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap; margin-bottom:10px;">
+    <div style="display:flex; align-items:center; gap:16px;">
+      <div style="width:10px; height:60px; background:var(--red);"></div>
+      <div>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em; color:var(--red); text-transform:uppercase;">Scroll Progress · Video Overlay Accent</div>
+        <div style="font-family:'IBM Plex Sans',sans-serif; font-size:14px; color:#B9B4A7; margin-top:4px;">Used for motion indicators, rare/limited tags, and hover states on video-driven sections — never as a base color.</div>
+      </div>
+    </div>
+    <span class="tag-rare">Rare Donor</span>
+  </div>
+
+  <!-- TYPE SAMPLES -->
+  <h2 class="section-title">Typography</h2>
+  <div class="type-sample">
+    <span class="label">Italiana / Luxury line</span>
+    <span class="t-display" style="font-family:'Italiana',serif; font-weight:400; letter-spacing:0.01em;">Immortal Icons.</span>
+  </div>
+  <div class="type-sample">
+    <span class="label">Orbitron / Tech line</span>
+    <span class="t-display" style="font-family:'Orbitron',sans-serif; font-weight:900; font-size:32px; color:var(--gold); letter-spacing:0.02em;">MODERN MUSCLE.</span>
+  </div>
+  <div class="type-sample">
+    <span class="label">Plex Sans / Body</span>
+    <span class="t-body">Every build begins with a rare donor chassis, stripped to bare metal and rebuilt using the finest modern engineering available today.</span>
+  </div>
+  <div class="type-sample">
+    <span class="label">Plex Mono / Labels</span>
+    <span class="t-mono">PROJECT №01 — MONACO EDITION</span>
+  </div>
+  <div class="type-sample">
+    <span class="label">JetBrains Mono / Numbers</span>
+    <span class="t-mono" style="font-family:'JetBrains Mono',monospace; font-weight:700;">640 HP / 3.2s / 1989</span>
+  </div>
+
+</div>
+</body>
+</html>

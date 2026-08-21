@@ -1,0 +1,32 @@
+:root{
+  /* 4px base unit; the grid stays on multiples so blueprint rules always align */
+  --space-0:0px;
+  --space-1:4px;
+  --space-2:8px;
+  --space-3:12px;
+  --space-4:16px;
+  --space-5:20px;
+  --space-6:24px;
+  --space-8:32px;
+  --space-10:40px;
+  --space-12:48px;
+  --space-16:64px;
+  --space-20:80px;
+  --space-24:96px;
+  --space-30:120px;
+  --space-40:160px;
+
+  /* Semantic rhythm */
+  --gutter-page:40px;
+  --gutter-page-wide:64px;
+  --measure-content:980px;   /* editorial column */
+  --measure-wide:1440px;     /* full product shell */
+  --measure-text:560px;      /* max width of a paragraph */
+  --section-gap:120px;       /* between major sections */
+  --section-gap-sm:70px;
+  --card-pad:28px;
+  --control-pad-y:14px;
+  --control-pad-x:28px;
+  --control-height:48px;
+  --control-height-sm:38px;
+}

@@ -1,0 +1,18 @@
+:root{
+  --duration-instant:90ms;
+  --duration-fast:160ms;
+  --duration-base:260ms;
+  --duration-slow:520ms;
+  --duration-draw:900ms;      /* blueprint line stroke-in */
+  --duration-count:1200ms;    /* spec number count-up */
+
+  --ease-standard:cubic-bezier(0.4,0,0.2,1);
+  --ease-out-technical:cubic-bezier(0.16,1,0.3,1);
+  --ease-draw:cubic-bezier(0.65,0,0.35,1);
+  --ease-linear:linear;
+
+  --transition-control:color var(--duration-fast) var(--ease-standard),background-color var(--duration-fast) var(--ease-standard),border-color var(--duration-fast) var(--ease-standard);
+}
+@media (prefers-reduced-motion:reduce){
+  :root{--duration-draw:1ms; --duration-count:1ms; --duration-slow:1ms;}
+}

@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vertex — Restomod Atelier</title>
+<meta name="description" content="Vertex is a restomod atelier. Rare classic chassis — air-cooled Porsche 911s, Mercedes-Benz SL roadsters, vintage Lamborghini and Ferrari — rebuilt with modern powertrains, bespoke interiors and 1,000+ hours of hand-finishing. Every build is one of one.">
+<meta name="theme-color" content="#0B0C0E">
+<meta property="og:title" content="Vertex — Restomod Atelier">
+<meta property="og:description" content="Immortal icons. Modern muscle. Classic chassis rebuilt at the point where character meets engineering.">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/svg+xml" href="assets/svg/logo-mark.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="css/webgl-grid.css">
+<script>
+  /* Synchronous, runs before any deferred script: js/main.js reads this to decide
+     whether to activate the full 2D fallback site, and src/main.js reads it to
+     decide whether to attempt mounting the WebGL grid at all. */
+  window.__vertexWebGL = (function () {
+    try {
+      var c = document.createElement('canvas');
+      return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl')));
+    } catch (err) { return false; }
+  })();
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<!-- The entire landing page: a fullscreen, fixed WebGL stage. This is the only
+     thing a WebGL-capable visitor ever sees — no scroll, no sections beneath it.
+     See README.md for why a full 2D site still exists (site-fallback below, and
+     full-site.html) rather than nothing at all for the visitors who can't run it. -->
+<div class="webgl-stage" id="webglStage">
+  <canvas id="webglCanvas" hidden role="img" aria-label="Interactive 3D showcase of the Vertex fleet — drag or swipe to explore."></canvas>
+  <div class="webgl-vignette" aria-hidden="true"></div>
+
+  <!-- Populated from FLEET_DATA at boot (src/main.js) — hidden by default,
+       toggled in via .is-list-view on .webgl-stage (see [data-mode-toggle]
+       in the chrome below). -->
+  <div class="webgl-list-view" data-list-view aria-hidden="true">
+    <div class="webgl-list-head">
+      <span class="webgl-list-eyebrow">The Fleet</span>
+      <span class="webgl-list-count" data-list-count></span>
+    </div>
+    <div class="webgl-list-body" data-list-body></div>
+  </div>
+
+  <!-- Toggled in via .is-philosophy-view on .webgl-stage from the "Our
+       Philosophy" tab (see [data-section-tab] in the chrome below). Static
+       markup, not JS-generated like the list/fleet data — this is fixed
+       editorial content, not a per-car template. -->
+  <div class="webgl-philosophy-view" data-philosophy-view aria-hidden="true">
+    <div class="phi-scroll">
+
+      <section class="phi-hero">
+        <div class="phi-hero-text">
+          <p class="phi-eyebrow">Our Philosophy</p>
+          <h2 class="phi-headline">It's found at the vertex —<br>the point where both meet.</h2>
+          <p class="phi-lead">Perfection isn't found in the newest technology, and it isn't found in old-world nostalgia either — it's found at the vertex, the point where both meet.</p>
+          <p class="phi-body">Modern hypercars have become sterile and digitalized. Even a limited-run supercar is still one of hundreds of nearly identical VINs. The icons of the past carry raw soul and timeless design, but are held back by outdated performance. We don't take that soul away. We elevate it.</p>
+          <div class="phi-stats">
+            <div class="phi-stat"><span class="phi-stat-figure" data-count="1,000+"><span class="phi-stat-value">0</span><small>hrs</small></span><span class="phi-stat-label">Minimum per build</span></div>
+            <div class="phi-stat"><span class="phi-stat-figure" data-count="10"><span class="phi-stat-value">0</span></span><span class="phi-stat-label">Builds completed and in progress</span></div>
+            <div class="phi-stat"><span class="phi-stat-figure" data-count="1"><span class="phi-stat-value">0</span><small>of 1</small></span><span class="phi-stat-label">Every commission</span></div>
+            <div class="phi-stat"><span class="phi-stat-figure" data-count="4"><span class="phi-stat-value">0</span></span><span class="phi-stat-label">Build slots remaining, 2026</span></div>
+          </div>
+        </div>
+        <!-- is-revealed here is static, not toggled by the scroll-reveal system
+             (src/main.js plays this one directly, above the fold, on entry) —
+             it exists purely so src/panelReveal.js's observeVideoLifecycle
+             knows this video is allowed to auto-resume once it scrolls back
+             into view after being paused for scrolling out of it. -->
+        <div class="phi-hero-video is-revealed">
+          <video muted loop playsinline preload="metadata" src="/cars/videos/ig1.mp4"></video>
+          <div class="phi-video-scrim" aria-hidden="true"></div>
+        </div>
+      </section>
+
+      <section class="phi-section">
+        <div class="phi-section-head"><span class="phi-eyebrow">The Craft</span><span class="phi-meta">01–05</span></div>
+        <div class="phi-video-grid">
+          <div class="phi-video-tile">
+            <video muted loop playsinline preload="metadata" src="/cars/videos/ig2.mp4"></video>
+            <div class="phi-video-scrim" aria-hidden="true"></div>
+            <div class="phi-video-caption"><span class="phi-video-tech">01 — Acquisition</span><span class="phi-video-title">Sourcing</span></div>
+          </div>
+          <div class="phi-video-tile">
+            <video muted loop playsinline preload="metadata" src="/cars/videos/1-1.mp4"></video>
+            <div class="phi-video-scrim" aria-hidden="true"></div>
+            <div class="phi-video-caption"><span class="phi-video-tech">02 — Restoration</span><span class="phi-video-title">Strip to bare metal</span></div>
+          </div>
+          <div class="phi-video-tile">
+            <video muted loop playsinline preload="metadata" src="/cars/videos/1-2.mp4"></video>
+            <div class="phi-video-scrim" aria-hidden="true"></div>
+            <div class="phi-video-caption"><span class="phi-video-tech">03 — Performance</span><span class="phi-video-title">Engineer the powertrain</span></div>
+          </div>
+          <div class="phi-video-tile">
+            <video muted loop playsinline preload="metadata" src="/cars/videos/1-3.mp4"></video>
+            <div class="phi-video-scrim" aria-hidden="true"></div>
+            <div class="phi-video-caption"><span class="phi-video-tech">04 — Interior</span><span class="phi-video-title">Craft the cabin</span></div>
+          </div>
+          <div class="phi-video-tile">
+            <video muted loop playsinline preload="metadata" src="/cars/videos/ig3.mp4"></video>
+            <div class="phi-video-scrim" aria-hidden="true"></div>
+            <div class="phi-video-caption"><span class="phi-video-tech">05 — Finishing</span><span class="phi-video-title">Final inspection</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="phi-section phi-reveal">
+        <div class="phi-reveal-media">
+          <video muted loop playsinline preload="metadata" src="/cars/videos/1-4.mp4"></video>
+          <div class="phi-video-scrim" aria-hidden="true"></div>
+        </div>
+        <div class="phi-reveal-text">
+          <p class="phi-eyebrow">The Reveal</p>
+          <p class="phi-lead">Every commission ends the same way it began — alone, under one light, with nothing left to do but pull the cover.</p>
+        </div>
+      </section>
+
+      <section class="phi-section">
+        <div class="phi-section-head"><span class="phi-eyebrow">Selected Partnerships</span><span class="phi-meta">Placeholder</span></div>
+        <div class="phi-partner-row" aria-hidden="true">
+          <div class="phi-partner-slot"></div>
+          <div class="phi-partner-slot"></div>
+          <div class="phi-partner-slot"></div>
+          <div class="phi-partner-slot"></div>
+          <div class="phi-partner-slot"></div>
+        </div>
+        <p class="phi-note">No partnerships to disclose yet — this row is reserved for the day there are.</p>
+      </section>
+
+      <section class="phi-section">
+        <div class="phi-section-head"><span class="phi-eyebrow">Our Workshop</span></div>
+        <p class="phi-body phi-body--wide">Every build lives in one facility for the length of its commission — sourced, stripped, engineered and finished by the same hands throughout, not handed between subcontractors along the way.</p>
+        <div class="phi-workshop-grid">
+          <img class="phi-reveal-img" src="/philosophy/car-factory.jpg" alt="" loading="lazy">
+          <img class="phi-reveal-img" src="/philosophy/work-desk.jpg" alt="" loading="lazy">
+        </div>
+      </section>
+
+      <footer class="phi-site-footer">
+        <div class="phi-footer-col phi-footer-brand">
+          <div class="phi-footer-logo"><img src="assets/svg/logo-mark.svg" alt=""><span>VERTEX</span></div>
+          <p class="phi-footer-copyright">© 2026 Vertex Atelier. All rights reserved.</p>
+        </div>
+        <nav class="phi-footer-col phi-footer-links" aria-label="Footer">
+          <a href="#" data-footer-section="fleet">Fleet</a>
+          <a href="#" data-footer-section="philosophy">Our Philosophy</a>
+          <a href="#" data-dummy>Privacy Policy</a>
+          <a href="#" data-dummy>Terms</a>
+        </nav>
+        <div class="phi-footer-col phi-footer-contact">
+          <div class="phi-footer-socials">
+            <a href="#" data-dummy>Instagram</a>
+            <a href="#" data-dummy>X / Twitter</a>
+          </div>
+          <a href="mailto:inquiries@vertex.com" class="phi-footer-email">inquiries@vertex.com</a>
+        </div>
+      </footer>
+
+    </div>
+  </div>
+
+  <!-- Toggled in via .is-detail-view on .webgl-stage — opened from any 3D
+       card click or List View row click (src/main.js -> src/detailView.js).
+       Sits ABOVE both the 3D grid and List View (see css/webgl-grid.css for
+       why) since it can be opened from either. Everything below the back
+       button is rebuilt per car by src/detailView.js — nothing here is
+       static except the shell. -->
+  <div class="webgl-detail-view" data-detail-view aria-hidden="true">
+    <button type="button" class="detail-back webgl-pill" data-detail-back>
+      <i data-lucide="arrow-left" aria-hidden="true"></i> Back to fleet
+    </button>
+    <div class="detail-scroll" data-detail-scroll data-detail-content></div>
+  </div>
+
+  <!-- Toggled in via .is-consultation-view — opened from the header's
+       "Request a build slot" pill (src/main.js), reachable from ANY other
+       view (Fleet, List, Our Philosophy, or a car detail), so it sits at a
+       HIGHER z-index (9) than all of them, including the car detail page
+       (8) — see css/webgl-grid.css. Static content, like Our Philosophy
+       (not per-item data like a car detail page), so src/consultationView.js
+       resets/re-observes this same persistent markup on every open rather
+       than rebuilding it. -->
+  <div class="webgl-consultation-view" data-consultation-view aria-hidden="true">
+    <button type="button" class="consultation-back webgl-pill" data-consultation-back>
+      <i data-lucide="arrow-left" aria-hidden="true"></i> Return to fleet
+    </button>
+    <div class="consultation-scroll" data-consultation-scroll>
+
+      <section class="consultation-hero">
+        <p class="phi-eyebrow">Private Atelier Consultation</p>
+        <h1 class="consultation-title">Commission Your Legacy</h1>
+        <p class="consultation-subtitle">Private Atelier Consultation &amp; Specification Session</p>
+        <p class="phi-body phi-body--wide consultation-intro">This is not a purchase — it's an application. Vertex accepts a limited number of consultation sessions each year, each one a private, in-person specification meeting inside the atelier itself. Submitting the form below requests a session; it does not reserve a build. Allocation is confirmed only after that first conversation.</p>
+      </section>
+
+      <section class="consultation-experience">
+        <div class="phi-section-head"><span class="phi-eyebrow">The Atelier Experience</span><span class="phi-meta">01–04</span></div>
+        <div class="consultation-grid">
+          <div class="consultation-card">
+            <span class="consultation-card-index">01</span>
+            <h3 class="consultation-card-title">Private Facility Access</h3>
+            <p class="consultation-card-body">Behind-the-scenes access to our master workshop and dynamic engineering bay — the same floor every commission is built on, not a showroom staged for visitors.</p>
+          </div>
+          <div class="consultation-card">
+            <span class="consultation-card-index">02</span>
+            <h3 class="consultation-card-title">Ergonomics &amp; Material Fitting</h3>
+            <p class="consultation-card-body">Hands-on tactile fitting for bespoke steering wheels, seating carbon weaves, and rare leather samples, before a single material decision is finalised.</p>
+          </div>
+          <div class="consultation-card">
+            <span class="consultation-card-index">03</span>
+            <h3 class="consultation-card-title">Chief Engineer Alignment</h3>
+            <p class="consultation-card-body">One-on-one technical consultation with our lead designers and dynamic chassis engineers — the people who will actually build the car, in the room.</p>
+          </div>
+          <div class="consultation-card">
+            <span class="consultation-card-index">04</span>
+            <h3 class="consultation-card-title">Bespoke Hospitality</h3>
+            <p class="consultation-card-body">Private lounge catering, track trial options, and a dedicated concierge for the length of your visit and every visit after.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="consultation-terms">
+        <blockquote class="consultation-quote">
+          <p class="consultation-quote-amount" data-count="2,000">$<span class="phi-stat-value">0</span><span class="consultation-quote-currency">USD</span></p>
+          <p class="consultation-quote-body">Consultation Commitment — fully credited toward your final vehicle allocation should you proceed to a commission. It is not owed if you don't.</p>
+        </blockquote>
+        <p class="consultation-notice">All vehicle commissions, fleet allocations, and multi-million dollar transactions are conducted strictly in-person within our Atelier via private escrow contracts.</p>
+      </section>
+
+      <section class="consultation-form-section">
+        <div class="phi-section-head"><span class="phi-eyebrow">Application</span><span class="phi-meta">Two-minute form</span></div>
+        <form class="consultation-form" data-consultation-form novalidate>
+          <div class="consultation-field">
+            <label for="cFullName">Full name</label>
+            <input id="cFullName" name="fullName" type="text" required autocomplete="name" placeholder="Your full name">
+          </div>
+          <div class="consultation-field">
+            <label for="cContact">Encrypted email / direct phone</label>
+            <input id="cContact" name="contact" type="text" required placeholder="you@example.com or +1 555 010 0142">
+          </div>
+          <div class="consultation-field">
+            <label for="cLocation">Preferred atelier location</label>
+            <div class="select-wrap">
+              <select id="cLocation" name="location">
+                <option value="">Select…</option>
+                <option>Los Angeles</option>
+                <option>Miami</option>
+                <option>London</option>
+                <option>Dubai</option>
+                <option value="Undecided">Undecided</option>
+              </select>
+            </div>
+          </div>
+          <div class="consultation-field">
+            <label for="cVision">Vehicle focus / custom vision</label>
+            <textarea id="cVision" name="vision" rows="4" placeholder="Donor chassis, era, or the story behind the build you have in mind."></textarea>
+          </div>
+          <div class="consultation-cta-row">
+            <button type="submit" class="consultation-cta" data-consultation-submit>Apply for Consultation Slot — $2,000 USD</button>
+            <p class="consultation-form-note">Applications are reviewed within two business days. The $2,000 commitment is only requested once a session is confirmed.</p>
+          </div>
+        </form>
+      </section>
+
+      <!-- Exact same footer markup as .webgl-philosophy-view's — see
+           css/webgl-grid.css's .phi-site-footer (unscoped, so it renders
+           identically here) and src/main.js's [data-footer-section] wiring
+           (stage-wide querySelectorAll, so this second copy is picked up
+           automatically with no JS changes). -->
+      <footer class="phi-site-footer">
+        <div class="phi-footer-col phi-footer-brand">
+          <div class="phi-footer-logo"><img src="assets/svg/logo-mark.svg" alt=""><span>VERTEX</span></div>
+          <p class="phi-footer-copyright">© 2026 Vertex Atelier. All rights reserved.</p>
+        </div>
+        <nav class="phi-footer-col phi-footer-links" aria-label="Footer">
+          <a href="#" data-footer-section="fleet">Fleet</a>
+          <a href="#" data-footer-section="philosophy">Our Philosophy</a>
+          <a href="#" data-dummy>Privacy Policy</a>
+          <a href="#" data-dummy>Terms</a>
+        </nav>
+        <div class="phi-footer-col phi-footer-contact">
+          <div class="phi-footer-socials">
+            <a href="#" data-dummy>Instagram</a>
+            <a href="#" data-dummy>X / Twitter</a>
+          </div>
+          <a href="mailto:inquiries@vertex.com" class="phi-footer-email">inquiries@vertex.com</a>
+        </div>
+      </footer>
+
+    </div>
+  </div>
+
+  <div class="webgl-chrome">
+    <div class="webgl-chrome-top">
+      <div class="webgl-chrome-row">
+        <a href="#" class="webgl-brand" data-reset-camera aria-label="Reset view to home"><img src="assets/svg/logo-mark.svg" alt=""><span>Vertex</span></a>
+        <div class="webgl-chrome-cluster">
+          <button type="button" class="webgl-pill" data-sound-toggle aria-pressed="false">
+            <svg class="webgl-tire" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+              <circle cx="12" cy="12" r="8.6"/>
+              <circle cx="12" cy="12" r="3.2"/>
+              <line x1="12" y1="3.4" x2="12" y2="6.2"/>
+              <line x1="12" y1="17.8" x2="12" y2="20.6"/>
+              <line x1="3.4" y1="12" x2="6.2" y2="12"/>
+              <line x1="17.8" y1="12" x2="20.6" y2="12"/>
+              <line x1="6.05" y1="6.05" x2="8.05" y2="8.05"/>
+              <line x1="15.95" y1="15.95" x2="17.95" y2="17.95"/>
+              <line x1="6.05" y1="17.95" x2="8.05" y2="15.95"/>
+              <line x1="15.95" y1="8.05" x2="17.95" y2="6.05"/>
+            </svg>
+            Sound <span data-sound-label>Off</span>
+          </button>
+          <span class="webgl-readout"><strong data-studio-clock><span data-clock-hh>00</span><span class="webgl-clock-colon" aria-hidden="true">:</span><span data-clock-mm>00</span></strong> &nbsp;Studio</span>
+          <button type="button" class="webgl-pill webgl-pill--primary" data-open-consultation>Request a build slot</button>
+        </div>
+      </div>
+      <p class="webgl-hint">Drag to orbit the fleet</p>
+    </div>
+
+    <div class="webgl-chrome-row">
+      <nav class="webgl-nav-pill webgl-mode-toggle" aria-label="Fleet display mode">
+        <button type="button" data-mode-toggle="grid" class="is-active" aria-pressed="true">3D Fleet</button>
+        <button type="button" data-mode-toggle="list" aria-pressed="false">List View</button>
+      </nav>
+      <nav class="webgl-nav-pill webgl-section-toggle" aria-label="Section">
+        <button type="button" data-section-tab="fleet" class="is-active" aria-pressed="true">Fleet</button>
+        <button type="button" data-section-tab="philosophy" aria-pressed="false">Our Philosophy</button>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<!-- Real fallback, not a stub: full previous site, byte-identical to full-site.html.
+     [hidden] by default — only revealed by js/main.js when window.__vertexWebGL is
+     false, or by src/main.js if a WebGL context inits but then fails at runtime.
+     Its own overflow-y:auto (css/webgl-grid.css) scrolls independently of the
+     locked html/body, so it isn't trapped by the fullscreen-stage lock above. -->
+<div class="site-fallback" id="siteFallback" hidden>
+
+  <header class="site-header" id="siteHeader">
+    <a href="#hero" class="logo-link">
+      <img src="assets/svg/logo-mark.svg" alt="" width="26" height="26">
+      <span class="wordmark">VERTEX</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <a href="#fleet" data-nav-link>Fleet</a>
+      <a href="#craft" data-nav-link>The craft</a>
+      <a href="#gallery" data-nav-link>Gallery</a>
+      <a href="#contact" data-nav-link>Contact</a>
+    </nav>
+    <div class="header-actions">
+      <a href="#contact" class="btn btn--secondary btn--sm">Request a build slot</a>
+      <button class="menu-toggle" data-menu-toggle aria-expanded="false" aria-controls="mobileMenu" aria-label="Open menu">
+        <span class="icon-toggle icon-toggle--menu"><i data-lucide="menu"></i></span>
+        <span class="icon-toggle icon-toggle--close" hidden><i data-lucide="x"></i></span>
+      </button>
+    </div>
+  </header>
+
+  <nav class="mobile-menu" id="mobileMenu" data-mobile-menu aria-label="Mobile">
+    <a href="#fleet">Fleet</a>
+    <a href="#craft">The craft</a>
+    <a href="#gallery">Gallery</a>
+    <a href="#contact">Contact</a>
+    <a href="#contact" class="btn btn--primary">Request a build slot</a>
+  </nav>
+
+  <main id="main">
+
+    <section class="hero" id="hero">
+      <div class="hero-media" data-hero-video>
+        <video muted loop playsinline autoplay data-src="assets/video/hero-loop.mp4" aria-hidden="true"></video>
+        <div class="hero-scene-wrap">
+          <svg class="hero-scene" viewBox="0 0 400 260" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
+            <path class="hero-scene-path" d="M46,198 C46,182 52,168 64,158 C78,146 92,136 108,132 C118,112 134,94 156,82 C176,71 198,66 218,68 C240,70 256,80 264,96 C270,108 270,118 268,130 C284,132 300,138 312,148 C326,160 334,174 334,198 Z"/>
+            <circle class="hero-scene-wheel" cx="110" cy="198" r="28"/>
+            <circle class="hero-scene-wheel" cx="278" cy="198" r="28"/>
+            <path class="hero-scene-dim" d="M46,228 H334 M46,222 V228 M334,222 V228"/>
+          </svg>
+        </div>
+      </div>
+      <div class="hero-grid" aria-hidden="true"></div>
+      <div class="hero-scrim" aria-hidden="true"></div>
+      <div class="hero-scrim-bottom" aria-hidden="true"></div>
+      <div class="hero-content">
+        <p class="eyebrow eyebrow--gold">Vertex — Restomod atelier</p>
+        <h1 class="headline headline--hero">
+          <span class="line-luxury">Immortal icons.</span>
+          <span class="line-tech">Modern muscle.</span>
+        </h1>
+        <p class="hero-sub">We do not build cars. We resurrect legends — the most iconic chassis in automotive history, rebuilt at the exact point where character meets engineering.</p>
+        <div class="hero-cta-row">
+          <a href="#fleet" class="btn btn--primary btn--lg">View the fleet</a>
+          <a href="#contact" class="btn btn--secondary btn--lg">Request a build slot <i data-lucide="arrow-right"></i></a>
+        </div>
+      </div>
+      <div class="hero-scroll" aria-hidden="true">
+        <span class="hero-scroll-line"></span>
+        <span>Scroll</span>
+      </div>
+    </section>
+
+    <section class="section" id="philosophy">
+      <div class="section-inner">
+        <div class="philosophy-grid">
+          <div>
+            <div class="section-head"><h2>Why we exist</h2><span class="meta">Since 2019</span></div>
+            <div class="bp-rule" data-draw></div>
+            <p class="philosophy-lead">Perfection isn't found in the newest technology, and it isn't found in old-world nostalgia either — it's found at the vertex, the point where both meet.</p>
+            <p class="philosophy-body">Modern hypercars have become sterile and digitalized. Even a limited-run supercar is still one of hundreds of nearly identical VINs. The icons of the past carry raw soul and timeless design, but are held back by outdated performance. We don't take that soul away. We elevate it.</p>
+          </div>
+          <div class="stat-grid">
+            <div class="spec-num spec-num--gold" data-count="1,000+"><div class="spec-num-figure"><span class="spec-num-value">1,000+</span><span class="spec-num-unit">hrs</span></div><div class="spec-num-label">Minimum per build</div></div>
+            <div class="spec-num" data-count="10"><div class="spec-num-figure"><span class="spec-num-value">10</span></div><div class="spec-num-label">Builds completed and in progress</div></div>
+            <div class="spec-num"><div class="spec-num-figure"><span class="spec-num-value">1</span><span class="spec-num-unit">of 1</span></div><div class="spec-num-label">Every commission</div></div>
+            <div class="spec-num" data-count="4"><div class="spec-num-figure"><span class="spec-num-value">4</span></div><div class="spec-num-label">Build slots remaining, 2026</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="fleet">
+      <div class="section-inner">
+        <div class="section-head"><h2>The fleet</h2><span class="meta">10 builds</span></div>
+        <div class="bp-rule" data-draw></div>
+        <div class="fleet-viewport" id="fleetViewport" data-cursor="drag">
+          <div class="fleet-track" id="fleetTrack"></div>
+        </div>
+        <div class="fleet-controls">
+          <div class="fleet-progress"><span class="fleet-progress-fill" id="fleetProgressFill"></span></div>
+          <div class="fleet-nav">
+            <button class="fleet-nav-btn" id="fleetPrev" aria-label="Previous build"><i data-lucide="chevron-left"></i></button>
+            <button class="fleet-nav-btn" id="fleetNext" aria-label="Next build"><i data-lucide="chevron-right"></i></button>
+          </div>
+        </div>
+        <p class="fleet-hint">
+          <span data-hint="mouse">Click and drag to browse, or use the arrows</span>
+          <span data-hint="touch">Swipe to browse the fleet</span>
+        </p>
+      </div>
+    </section>
+
+    <section class="section" id="craft">
+      <div class="section-inner">
+        <div class="section-head"><h2>The craft</h2><span class="meta">01–04</span></div>
+        <div class="bp-rule" data-draw></div>
+        <p class="philosophy-lead" style="max-width:var(--measure-text);margin-bottom:var(--space-16)">Every build begins with a rare donor chassis, stripped to bare metal and rebuilt using the finest modern engineering available today. Nothing about the silhouette is negotiable. Everything beneath it is.</p>
+        <div class="craft-layout">
+          <div class="process-list" id="processList"></div>
+          <div>
+            <div class="craft-aside-label"><span class="eyebrow eyebrow--brass">Donor to delivery</span></div>
+            <div class="before-after" data-before-after>
+              <div class="before-after-panel" style="background-image:url('assets/svg/motifs/silhouette-coupe.svg')"></div>
+              <div class="before-after-clip" style="clip-path:inset(0 50% 0 0)">
+                <div class="before-after-panel before-after-panel--before" style="background-image:url('assets/svg/motifs/silhouette-coupe.svg')"></div>
+              </div>
+              <div class="before-after-handle" style="left:50%">
+                <span class="before-after-grip"><span></span><span></span></span>
+              </div>
+              <span class="before-after-label before-after-label--left">As acquired</span>
+              <span class="before-after-label before-after-label--right">Vertex build</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="gallery">
+      <div class="section-inner">
+        <div class="section-head"><h2>Detail &amp; specification</h2><span class="meta">8 details shown</span></div>
+        <div class="bp-rule" data-draw></div>
+        <p class="philosophy-lead" style="max-width:var(--measure-text);margin-bottom:var(--space-10)">Hover to inspect. Every seam, weld and gauge is finished to the same standard as the bodywork.</p>
+        <div class="gallery-grid" id="galleryGrid"></div>
+      </div>
+    </section>
+
+    <section class="section" id="contact">
+      <div class="section-inner">
+        <div class="section-head"><h2>Request a build slot</h2><span class="meta">4 slots remain, 2026</span></div>
+        <div class="bp-rule" data-draw></div>
+        <div class="contact-grid">
+          <div class="contact-intro">
+            <p>Vertex builds are commissioned, not purchased off a lot. Tell us the donor you have in mind, or the era you want revived, and we will confirm whether a build slot is available.</p>
+            <div class="contact-scarcity"><p class="eyebrow eyebrow--gold">Four build slots remain in 2026.</p></div>
+            <div class="contact-detail"><strong>Private showroom</strong> — by appointment only</div>
+            <div class="contact-detail"><strong>Email</strong> — enquiries@vertex-atelier.com</div>
+            <div class="contact-detail"><strong>Telephone</strong> — +1 (555) 010-0142</div>
+          </div>
+          <form id="inquiryForm" novalidate>
+            <div class="field-row">
+              <div class="field"><label for="fullName">Full name<span class="req"> *</span></label><input id="fullName" name="fullName" type="text" required autocomplete="name" placeholder="Your name"></div>
+              <div class="field"><label for="email">Email<span class="req"> *</span></label><input id="email" name="email" type="email" required autocomplete="email" placeholder="you@example.com"></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label for="phone">Telephone</label><input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="Optional"></div>
+              <div class="field">
+                <label for="donorInterest">Donor interest</label>
+                <div class="select-wrap">
+                  <select id="donorInterest" name="donorInterest">
+                    <option value="">Select…</option>
+                    <option value="Porsche">Porsche</option>
+                    <option value="Mercedes-Benz">Mercedes-Benz</option>
+                    <option value="Lamborghini">Lamborghini</option>
+                    <option value="Ferrari">Ferrari</option>
+                    <option value="Undecided">Undecided</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="field">
+              <label for="timeline">Preferred timeline</label>
+              <div class="select-wrap">
+                <select id="timeline" name="timeline">
+                  <option value="">Select…</option>
+                  <option value="Flexible">Flexible</option>
+                  <option value="Within 12 months">Within 12 months</option>
+                  <option value="Within 24 months">Within 24 months</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label for="message">The direction you have in mind</label>
+              <textarea id="message" name="message" rows="5" placeholder="Donor chassis, era, colour, the story behind it — as much or as little as you have."></textarea>
+            </div>
+            <label class="checkbox-field">
+              <input type="checkbox" name="updates">
+              <span class="checkbox-box"></span>
+              <span class="checkbox-text">Keep me informed of future build slots and archive additions.</span>
+            </label>
+            <div class="form-foot">
+              <button type="submit" class="btn btn--primary btn--lg">Request a build slot</button>
+              <span class="form-foot-note">Responses within two business days.</span>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="section-inner">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <a href="#hero" class="logo-link">
+            <img src="assets/svg/logo-mark.svg" alt="" width="24" height="24">
+            <span class="wordmark">VERTEX</span>
+          </a>
+          <p>Iconic chassis, rebuilt at the point where character meets engineering.</p>
+          <div class="footer-social">
+            <a href="#" aria-label="Instagram"><i data-lucide="instagram"></i></a>
+            <a href="#" aria-label="YouTube"><i data-lucide="youtube"></i></a>
+            <a href="mailto:enquiries@vertex-atelier.com" aria-label="Email"><i data-lucide="mail"></i></a>
+          </div>
+        </div>
+        <div class="footer-cols" id="footerColumns"></div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span id="year">2026</span> Vertex. All builds one of one.</span>
+        <span><a href="#">Privacy</a> · <a href="#">Terms</a></span>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<script defer src="https://unpkg.com/lucide@0.462.0"></script>
+<script defer src="js/data.js"></script>
+<script defer src="js/icons.js"></script>
+<script defer src="js/cursor.js"></script>
+<script defer src="js/nav.js"></script>
+<script defer src="js/reveal.js"></script>
+<script defer src="js/media.js"></script>
+<script defer src="js/magnify.js"></script>
+<script defer src="js/carousel.js"></script>
+<script defer src="js/dialog.js"></script>
+<script defer src="js/form.js"></script>
+<script defer src="js/main.js"></script>
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+:root{
+  --duration-instant:90ms; /* @kind other */
+  --duration-fast:160ms; /* @kind other */
+  --duration-base:260ms; /* @kind other */
+  --duration-slow:520ms; /* @kind other */
+  --duration-draw:900ms;      /* blueprint line stroke-in */
+  --duration-count:1200ms;    /* spec number count-up */
+
+  --ease-standard:cubic-bezier(0.4,0,0.2,1); /* @kind other */
+  --ease-out-technical:cubic-bezier(0.16,1,0.3,1); /* @kind other */
+  --ease-draw:cubic-bezier(0.65,0,0.35,1); /* @kind other */
+  --ease-linear:linear; /* @kind other */
+
+  --transition-control:color var(--duration-fast) var(--ease-standard),background-color var(--duration-fast) var(--ease-standard),border-color var(--duration-fast) var(--ease-standard); /* @kind other */
+}
+@media (prefers-reduced-motion:reduce){
+  :root{--duration-draw:1ms; /* @kind other */ --duration-count:1ms; /* @kind other */ --duration-slow:1ms; /* @kind other */}
+}

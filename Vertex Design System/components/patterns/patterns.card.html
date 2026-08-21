@@ -1,0 +1,33 @@
+<!-- @dsCard group="Components" viewport="700x520" name="Patterns — build card, specs, comparison, audio" subtitle="Composite product patterns" -->
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>Vertex — Patterns</title>
+<link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>body{padding:24px;background:var(--surface-page)}.row{display:flex;flex-wrap:wrap;gap:20px;align-items:center}.col{display:flex;flex-direction:column;gap:18px}.lbl{font:var(--type-eyebrow);letter-spacing:var(--tracking-label);text-transform:uppercase;color:var(--text-label);margin-bottom:10px}</style>
+</head><body><div id="root"></div>
+<script type="text/babel">
+const NS = window.VertexDesignSystem_24ef46;
+
+const { BuildCard, SpecTable, BeforeAfter, AcousticPlayer } = NS;
+function Demo(){return (<div style={{display:'grid',gridTemplateColumns:'300px 1fr',gap:24}}>
+  <BuildCard code="Project 01" title="Monaco Edition" donor="Air-cooled 964 Targa" status="rare" power="640 hp" hours="1,247" onSelect={()=>{}}/>
+  <div className="col">
+    <SpecTable rows={[
+      {label:'Engine',value:'3.6 flat-six, twin-plug'},
+      {label:'Power output',value:'640 hp',numeric:true,accent:true},
+      {label:'0–100 km/h',value:'3.2 s',numeric:true},
+      {label:'Paint',value:'PTS Monaco Blue'}
+    ]}/>
+    <BeforeAfter ratio="16 / 7"/>
+    <AcousticPlayer tracks={[{label:'Cold start',duration:'0:34'},{label:'Exhaust note',duration:'1:12'}]}/>
+  </div>
+</div>);}
+ReactDOM.createRoot(document.getElementById('root')).render(<Demo />);
+setTimeout(()=>window.lucide&&window.lucide.createIcons(),120);
+</script></body></html>

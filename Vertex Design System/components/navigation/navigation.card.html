@@ -1,0 +1,27 @@
+<!-- @dsCard group="Components" viewport="700x400" name="Navigation — header, tabs, footer" subtitle="Site chrome and in-page switching" -->
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>Vertex — Navigation</title>
+<link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>body{padding:24px;background:var(--surface-page)}.row{display:flex;flex-wrap:wrap;gap:20px;align-items:center}.col{display:flex;flex-direction:column;gap:18px}.lbl{font:var(--type-eyebrow);letter-spacing:var(--tracking-label);text-transform:uppercase;color:var(--text-label);margin-bottom:10px}</style>
+</head><body><div id="root"></div>
+<script type="text/babel">
+const NS = window.VertexDesignSystem_24ef46;
+
+const { SiteHeader, SiteFooter, Tabs } = NS;
+function Demo(){
+  const [p,setP]=React.useState('builds');const [t,setT]=React.useState('Exterior');
+  return (<div style={{border:'1px solid var(--line-structural)'}}>
+    <SiteHeader active={p} onNavigate={setP} items={[{value:'builds',label:'Available builds'},{value:'archive',label:'Legacy archive'},{value:'process',label:'Process'},{value:'showroom',label:'Showroom'}]}/>
+    <div style={{padding:'28px 40px'}}><Tabs items={['Exterior','Interior','Powertrain']} value={t} onChange={setT}/></div>
+    <SiteFooter columns={[{title:'Builds',links:['Available builds','Legacy archive','Commission']},{title:'Studio',links:['Private showroom','Process','Contact']}]}/>
+  </div>);}
+ReactDOM.createRoot(document.getElementById('root')).render(<Demo />);
+setTimeout(()=>window.lucide&&window.lucide.createIcons(),120);
+</script></body></html>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+<defs><pattern id="g" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#2E3B47" stroke-width="1" opacity="0.35"/></pattern></defs>
+<rect width="400" height="400" fill="url(#g)"/>
+<g fill="none" stroke="#EDE8DD" stroke-width="1.5">
+<circle cx="140" cy="230" r="80"/><circle cx="140" cy="230" r="54"/><circle cx="140" cy="230" r="32"/>
+<circle cx="288" cy="190" r="64"/><circle cx="288" cy="190" r="42"/><circle cx="288" cy="190" r="24"/>
+</g>
+<path d="M84,196 A80,80 0 0 1 176,168" fill="none" stroke="#C9A66B" stroke-width="1.5"/>
+<g stroke="#EDE8DD" stroke-width="1" opacity="0.6">
+<path d="M110,120 L100,90 M140,110 L140,78 M172,120 L182,90"/>
+</g>
+<g stroke="#2E3B47" stroke-width="1" opacity="0.7">
+<path d="M14,14 V26 M14,14 H26"/><path d="M386,14 V26 M386,14 H374"/>
+<path d="M14,386 V374 M14,386 H26"/><path d="M386,386 V374 M386,386 H374"/>
+</g>
+</svg>

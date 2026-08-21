@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vertex — Restomod Atelier</title>
+<meta name="description" content="Vertex is a restomod atelier. Rare classic chassis — air-cooled Porsche 911s, Mercedes-Benz SL roadsters, vintage Lamborghini and Ferrari — rebuilt with modern powertrains, bespoke interiors and 1,000+ hours of hand-finishing. Every build is one of one.">
+<meta name="theme-color" content="#0B0C0E">
+<meta property="og:title" content="Vertex — Restomod Atelier">
+<meta property="og:description" content="Immortal icons. Modern muscle. Classic chassis rebuilt at the point where character meets engineering.">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/svg+xml" href="assets/svg/logo-mark.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="css/webgl-grid.css">
+<script>
+  /* Synchronous, runs before any deferred script: js/main.js reads this to decide
+     whether to activate the 2D drag carousel, and src/main.js reads it to decide
+     whether to attempt mounting the WebGL grid at all. */
+  window.__vertexWebGL = (function () {
+    try {
+      var c = document.createElement('canvas');
+      return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl')));
+    } catch (err) { return false; }
+  })();
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header" id="siteHeader">
+  <a href="#hero" class="logo-link">
+    <img src="assets/svg/logo-mark.svg" alt="" width="26" height="26">
+    <span class="wordmark">VERTEX</span>
+  </a>
+  <nav class="site-nav" aria-label="Primary">
+    <a href="#fleet" data-nav-link>Fleet</a>
+    <a href="#craft" data-nav-link>The craft</a>
+    <a href="#gallery" data-nav-link>Gallery</a>
+    <a href="#contact" data-nav-link>Contact</a>
+  </nav>
+  <div class="header-actions">
+    <a href="#contact" class="btn btn--secondary btn--sm">Request a build slot</a>
+    <button class="menu-toggle" data-menu-toggle aria-expanded="false" aria-controls="mobileMenu" aria-label="Open menu">
+      <span class="icon-toggle icon-toggle--menu"><i data-lucide="menu"></i></span>
+      <span class="icon-toggle icon-toggle--close" hidden><i data-lucide="x"></i></span>
+    </button>
+  </div>
+</header>
+
+<nav class="mobile-menu" id="mobileMenu" data-mobile-menu aria-label="Mobile">
+  <a href="#fleet">Fleet</a>
+  <a href="#craft">The craft</a>
+  <a href="#gallery">Gallery</a>
+  <a href="#contact">Contact</a>
+  <a href="#contact" class="btn btn--primary">Request a build slot</a>
+</nav>
+
+<main id="main">
+
+  <section class="hero" id="hero">
+    <div class="hero-media" data-hero-video>
+      <video muted loop playsinline autoplay data-src="assets/video/hero-loop.mp4" aria-hidden="true"></video>
+      <div class="hero-scene-wrap">
+        <svg class="hero-scene" viewBox="0 0 400 260" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
+          <path class="hero-scene-path" d="M46,198 C46,182 52,168 64,158 C78,146 92,136 108,132 C118,112 134,94 156,82 C176,71 198,66 218,68 C240,70 256,80 264,96 C270,108 270,118 268,130 C284,132 300,138 312,148 C326,160 334,174 334,198 Z"/>
+          <circle class="hero-scene-wheel" cx="110" cy="198" r="28"/>
+          <circle class="hero-scene-wheel" cx="278" cy="198" r="28"/>
+          <path class="hero-scene-dim" d="M46,228 H334 M46,222 V228 M334,222 V228"/>
+        </svg>
+      </div>
+    </div>
+    <div class="hero-grid" aria-hidden="true"></div>
+    <div class="hero-scrim" aria-hidden="true"></div>
+    <div class="hero-scrim-bottom" aria-hidden="true"></div>
+    <div class="hero-content">
+      <p class="eyebrow eyebrow--gold">Vertex — Restomod atelier</p>
+      <h1 class="headline headline--hero">
+        <span class="line-luxury">Immortal icons.</span>
+        <span class="line-tech">Modern muscle.</span>
+      </h1>
+      <p class="hero-sub">We do not build cars. We resurrect legends — the most iconic chassis in automotive history, rebuilt at the exact point where character meets engineering.</p>
+      <div class="hero-cta-row">
+        <a href="#fleet" class="btn btn--primary btn--lg">View the fleet</a>
+        <a href="#contact" class="btn btn--secondary btn--lg">Request a build slot <i data-lucide="arrow-right"></i></a>
+      </div>
+    </div>
+    <div class="hero-scroll" aria-hidden="true">
+      <span class="hero-scroll-line"></span>
+      <span>Scroll</span>
+    </div>
+  </section>
+
+  <section class="section" id="philosophy">
+    <div class="section-inner">
+      <div class="philosophy-grid">
+        <div>
+          <div class="section-head"><h2>Why we exist</h2><span class="meta">Since 2019</span></div>
+          <div class="bp-rule" data-draw></div>
+          <p class="philosophy-lead">Perfection isn't found in the newest technology, and it isn't found in old-world nostalgia either — it's found at the vertex, the point where both meet.</p>
+          <p class="philosophy-body">Modern hypercars have become sterile and digitalized. Even a limited-run supercar is still one of hundreds of nearly identical VINs. The icons of the past carry raw soul and timeless design, but are held back by outdated performance. We don't take that soul away. We elevate it.</p>
+        </div>
+        <div class="stat-grid">
+          <div class="spec-num spec-num--gold" data-count="1,000+"><div class="spec-num-figure"><span class="spec-num-value">1,000+</span><span class="spec-num-unit">hrs</span></div><div class="spec-num-label">Minimum per build</div></div>
+          <div class="spec-num" data-count="10"><div class="spec-num-figure"><span class="spec-num-value">10</span></div><div class="spec-num-label">Builds completed and in progress</div></div>
+          <div class="spec-num"><div class="spec-num-figure"><span class="spec-num-value">1</span><span class="spec-num-unit">of 1</span></div><div class="spec-num-label">Every commission</div></div>
+          <div class="spec-num" data-count="4"><div class="spec-num-figure"><span class="spec-num-value">4</span></div><div class="spec-num-label">Build slots remaining, 2026</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="fleet" style="padding-bottom:0">
+    <div class="section-inner">
+      <div class="section-head"><h2>The fleet</h2><span class="meta">Drag to explore</span></div>
+      <div class="bp-rule" data-draw></div>
+    </div>
+
+    <div class="webgl-stage" id="webglStage">
+      <canvas id="webglCanvas" hidden role="img" aria-label="Interactive 3D showcase of the Vertex fleet — drag, swipe or scroll to explore. A full list of current builds follows this section."></canvas>
+
+      <div class="webgl-chrome">
+        <div class="webgl-chrome-top">
+          <div class="webgl-chrome-row">
+            <a href="#hero" class="webgl-brand"><img src="assets/svg/logo-mark.svg" alt=""><span>Vertex</span></a>
+            <div class="webgl-chrome-cluster">
+              <button type="button" class="webgl-pill" data-sound-toggle aria-pressed="false">
+                <i data-lucide="volume-2"></i> Sound <span data-sound-label>Off</span>
+              </button>
+              <span class="webgl-readout"><strong data-studio-clock>00:00</strong> &nbsp;Studio</span>
+              <button type="button" class="webgl-pill webgl-pill--primary" data-dummy>Request a build slot</button>
+            </div>
+          </div>
+          <p class="webgl-hint">Drag to orbit the fleet — scroll or swipe also works</p>
+        </div>
+
+        <div class="webgl-chrome-row">
+          <div class="webgl-icon-group">
+            <button type="button" class="webgl-icon-btn is-active" data-view-toggle aria-label="Grid view"><i data-lucide="layout-grid"></i></button>
+            <button type="button" class="webgl-icon-btn" data-view-toggle aria-label="List view"><i data-lucide="list"></i></button>
+          </div>
+          <nav class="webgl-nav-pill" aria-label="Showcase sections (display only)">
+            <button type="button" data-dummy>Fleet</button>
+            <button type="button" data-dummy>Craft</button>
+            <button type="button" data-dummy>Archive</button>
+          </nav>
+          <button type="button" class="webgl-pill" data-dummy><i data-lucide="sliders-horizontal"></i> Filter</button>
+        </div>
+      </div>
+
+      <div class="webgl-status" data-webgl-status></div>
+
+      <div class="webgl-fallback" id="webglFallback" hidden>
+        <div class="fleet-viewport" id="fleetViewport" data-cursor="drag">
+          <div class="fleet-track" id="fleetTrack"></div>
+        </div>
+        <div class="fleet-controls">
+          <div class="fleet-progress"><span class="fleet-progress-fill" id="fleetProgressFill"></span></div>
+          <div class="fleet-nav">
+            <button class="fleet-nav-btn" id="fleetPrev" aria-label="Previous build"><i data-lucide="chevron-left"></i></button>
+            <button class="fleet-nav-btn" id="fleetNext" aria-label="Next build"><i data-lucide="chevron-right"></i></button>
+          </div>
+        </div>
+        <p class="fleet-hint">
+          <span data-hint="mouse">Click and drag to browse, or use the arrows</span>
+          <span data-hint="touch">Swipe to browse the fleet</span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="craft">
+    <div class="section-inner">
+      <div class="section-head"><h2>The craft</h2><span class="meta">01–04</span></div>
+      <div class="bp-rule" data-draw></div>
+      <p class="philosophy-lead" style="max-width:var(--measure-text);margin-bottom:var(--space-16)">Every build begins with a rare donor chassis, stripped to bare metal and rebuilt using the finest modern engineering available today. Nothing about the silhouette is negotiable. Everything beneath it is.</p>
+      <div class="craft-layout">
+        <div class="process-list" id="processList"></div>
+        <div>
+          <div class="craft-aside-label"><span class="eyebrow eyebrow--brass">Donor to delivery</span></div>
+          <div class="before-after" data-before-after>
+            <div class="before-after-panel" style="background-image:url('assets/svg/motifs/silhouette-coupe.svg')"></div>
+            <div class="before-after-clip" style="clip-path:inset(0 50% 0 0)">
+              <div class="before-after-panel before-after-panel--before" style="background-image:url('assets/svg/motifs/silhouette-coupe.svg')"></div>
+            </div>
+            <div class="before-after-handle" style="left:50%">
+              <span class="before-after-grip"><span></span><span></span></span>
+            </div>
+            <span class="before-after-label before-after-label--left">As acquired</span>
+            <span class="before-after-label before-after-label--right">Vertex build</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="gallery">
+    <div class="section-inner">
+      <div class="section-head"><h2>Detail &amp; specification</h2><span class="meta">8 details shown</span></div>
+      <div class="bp-rule" data-draw></div>
+      <p class="philosophy-lead" style="max-width:var(--measure-text);margin-bottom:var(--space-10)">Hover to inspect. Every seam, weld and gauge is finished to the same standard as the bodywork.</p>
+      <div class="gallery-grid" id="galleryGrid"></div>
+    </div>
+  </section>
+
+  <section class="section" id="contact">
+    <div class="section-inner">
+      <div class="section-head"><h2>Request a build slot</h2><span class="meta">4 slots remain, 2026</span></div>
+      <div class="bp-rule" data-draw></div>
+      <div class="contact-grid">
+        <div class="contact-intro">
+          <p>Vertex builds are commissioned, not purchased off a lot. Tell us the donor you have in mind, or the era you want revived, and we will confirm whether a build slot is available.</p>
+          <div class="contact-scarcity"><p class="eyebrow eyebrow--gold">Four build slots remain in 2026.</p></div>
+          <div class="contact-detail"><strong>Private showroom</strong> — by appointment only</div>
+          <div class="contact-detail"><strong>Email</strong> — enquiries@vertex-atelier.com</div>
+          <div class="contact-detail"><strong>Telephone</strong> — +1 (555) 010-0142</div>
+        </div>
+        <form id="inquiryForm" novalidate>
+          <div class="field-row">
+            <div class="field"><label for="fullName">Full name<span class="req"> *</span></label><input id="fullName" name="fullName" type="text" required autocomplete="name" placeholder="Your name"></div>
+            <div class="field"><label for="email">Email<span class="req"> *</span></label><input id="email" name="email" type="email" required autocomplete="email" placeholder="you@example.com"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label for="phone">Telephone</label><input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="Optional"></div>
+            <div class="field">
+              <label for="donorInterest">Donor interest</label>
+              <div class="select-wrap">
+                <select id="donorInterest" name="donorInterest">
+                  <option value="">Select…</option>
+                  <option value="Porsche">Porsche</option>
+                  <option value="Mercedes-Benz">Mercedes-Benz</option>
+                  <option value="Lamborghini">Lamborghini</option>
+                  <option value="Ferrari">Ferrari</option>
+                  <option value="Undecided">Undecided</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label for="timeline">Preferred timeline</label>
+            <div class="select-wrap">
+              <select id="timeline" name="timeline">
+                <option value="">Select…</option>
+                <option value="Flexible">Flexible</option>
+                <option value="Within 12 months">Within 12 months</option>
+                <option value="Within 24 months">Within 24 months</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="message">The direction you have in mind</label>
+            <textarea id="message" name="message" rows="5" placeholder="Donor chassis, era, colour, the story behind it — as much or as little as you have."></textarea>
+          </div>
+          <label class="checkbox-field">
+            <input type="checkbox" name="updates">
+            <span class="checkbox-box"></span>
+            <span class="checkbox-text">Keep me informed of future build slots and archive additions.</span>
+          </label>
+          <div class="form-foot">
+            <button type="submit" class="btn btn--primary btn--lg">Request a build slot</button>
+            <span class="form-foot-note">Responses within two business days.</span>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="section-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="#hero" class="logo-link">
+          <img src="assets/svg/logo-mark.svg" alt="" width="24" height="24">
+          <span class="wordmark">VERTEX</span>
+        </a>
+        <p>Iconic chassis, rebuilt at the point where character meets engineering.</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Instagram"><i data-lucide="instagram"></i></a>
+          <a href="#" aria-label="YouTube"><i data-lucide="youtube"></i></a>
+          <a href="mailto:enquiries@vertex-atelier.com" aria-label="Email"><i data-lucide="mail"></i></a>
+        </div>
+      </div>
+      <div class="footer-cols" id="footerColumns"></div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year">2026</span> Vertex. All builds one of one.</span>
+      <span><a href="#">Privacy</a> · <a href="#">Terms</a></span>
+    </div>
+  </div>
+</footer>
+
+<script defer src="https://unpkg.com/lucide@0.462.0"></script>
+<script defer src="js/data.js"></script>
+<script defer src="js/icons.js"></script>
+<script defer src="js/cursor.js"></script>
+<script defer src="js/nav.js"></script>
+<script defer src="js/reveal.js"></script>
+<script defer src="js/media.js"></script>
+<script defer src="js/magnify.js"></script>
+<script defer src="js/carousel.js"></script>
+<script defer src="js/dialog.js"></script>
+<script defer src="js/form.js"></script>
+<script defer src="js/main.js"></script>
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>

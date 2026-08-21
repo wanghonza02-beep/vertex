@@ -1,0 +1,62 @@
+:root{
+  /* ---- Families ---- */
+  --font-luxury:'Italiana', 'Times New Roman', serif;      /* heritage half of a headline, wordmark */
+  --font-tech:'Orbitron', 'Arial Black', sans-serif;        /* engineering half of a headline */
+  --font-body:'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono:'IBM Plex Mono', ui-monospace, monospace;     /* labels, eyebrows, project codes */
+  --font-numeric:'JetBrains Mono', ui-monospace, monospace; /* oversized spec numbers */
+
+  /* ---- Weights ---- */
+  --weight-luxury:400;
+  --weight-tech:900;
+  --weight-tech-med:700;
+  --weight-body:400;
+  --weight-body-med:500;
+  --weight-body-semi:600;
+  --weight-mono:500;
+  --weight-numeric:700;
+
+  /* ---- Size scale (base 16px) ---- */
+  --size-hero-luxury:96px;
+  --size-hero-tech:74px;
+  --size-display-luxury:66px;
+  --size-display-tech:52px;
+  --size-headline:40px;
+  --size-title:28px;
+  --size-subtitle:19px;
+  --size-body-lg:18px;
+  --size-body:16px;
+  --size-body-sm:14px;
+  --size-label:13px;
+  --size-label-sm:11px;
+  --size-spec-xl:88px;
+  --size-spec-lg:56px;
+  --size-spec:44px;
+  --size-spec-sm:28px;
+
+  /* ---- Line heights ---- */
+  --leading-hero:1.05;
+  --leading-display:1.1;
+  --leading-tech:1.15;
+  --leading-title:1.25;
+  --leading-body:1.6;
+  --leading-label:1.4;
+  --leading-numeric:1;
+
+  /* ---- Tracking ---- */
+  --tracking-luxury:0.01em;
+  --tracking-wordmark:0.12em;
+  --tracking-tech:0.02em;
+  --tracking-body:0;
+  --tracking-label:0.12em;
+  --tracking-eyebrow:0.15em;
+  --tracking-cta:0.1em;
+  --tracking-numeric:-0.02em;
+
+  /* ---- Semantic type aliases ---- */
+  --type-eyebrow:var(--weight-mono) var(--size-label-sm)/var(--leading-label) var(--font-mono);
+  --type-label:var(--weight-mono) var(--size-label)/var(--leading-label) var(--font-mono);
+  --type-body:var(--weight-body) var(--size-body)/var(--leading-body) var(--font-body);
+  --type-body-lg:var(--weight-body) var(--size-body-lg)/var(--leading-body) var(--font-body);
+  --type-cta:var(--weight-mono) var(--size-label)/1 var(--font-mono);
+}

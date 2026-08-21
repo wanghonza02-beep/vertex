@@ -1,0 +1,934 @@
+/* ==========================================================================
+   Fullscreen WebGL portfolio grid + its floating chrome — the entire landing
+   page for any WebGL-capable visitor. No scroll, no sections beneath it: this
+   IS the page. See index.html for why #siteFallback (the previous full site,
+   also preserved standalone at full-site.html) still exists — real fallback
+   for the visitors who can't run this, not a stub.
+
+   The rounded pills are a deliberate, scoped exception to the design system's
+   0px-radius rule: the brief asked for this to look "exactly like
+   phantom.land," and phantom.land's floating chrome is built from fully-
+   rounded pills. Rather than fight that reference, the pills keep Phantom's
+   shape language and carry ONLY Vertex's colours/type/copy — graphite-glass
+   fill, hairline borders that warm to gold on hover, IBM Plex Mono uppercase,
+   gold rationed to the single primary CTA. Nothing else on the page uses this
+   radius; it does not leak into css/site.css.
+   ========================================================================== */
+
+html, body {
+  height: 100%;
+  overflow: hidden; /* the WebGL stage is the whole viewport; #site-fallback (below)
+                        scrolls independently of this lock via its own overflow-y */
+}
+
+.webgl-stage {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 10;
+  background: transparent;
+  pointer-events: none; /* see .is-webgl-active below: until the scene is confirmed
+                            rendering, this stage must not block clicks to
+                            #siteFallback sitting underneath it */
+}
+.webgl-stage.is-webgl-active {
+  background: radial-gradient(120% 120% at 50% 30%, #14161a 0%, var(--vertex-black) 70%);
+  pointer-events: auto;
+}
+
+#webglCanvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: grab;
+}
+#webglCanvas:active { cursor: grabbing; }
+
+/* Edge vignette: blurs whatever's behind it (the canvas) via backdrop-filter,
+   but only where its own mask-image is opaque — transparent in the center so
+   the focal cards stay tack-sharp, opaque toward the rim so peripheral cards
+   soften and pull focus inward. pointer-events:none so drag/hover on the
+   canvas underneath is completely unaffected. z-index sits ABOVE the canvas
+   (1) and BELOW the chrome (10) — the chrome must never read as blurred. */
+.webgl-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent 0%, transparent 40%, rgba(0,0,0,0.6) 70%, black 100%);
+  mask-image: radial-gradient(circle at 50% 50%, transparent 0%, transparent 40%, rgba(0,0,0,0.6) 70%, black 100%);
+}
+
+.webgl-chrome {
+  position: absolute;
+  inset: 0;
+  z-index: 10; /* CRITICAL: must stay above .webgl-vignette (5) so every
+                  floating control reads 100% crisp, never blurred */
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+  font-family: var(--font-mono);
+}
+@media (min-width: 640px) { .webgl-chrome { padding: var(--space-8); } }
+
+.webgl-chrome-top { display: flex; flex-direction: column; gap: var(--space-3); pointer-events: none; }
+.webgl-chrome-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); pointer-events: none; }
+.webgl-chrome-cluster { display: flex; align-items: center; gap: var(--space-3); pointer-events: none; }
+.webgl-chrome-cluster > * { pointer-events: auto; }
+
+.webgl-brand { display: inline-flex; align-items: center; gap: 14px; pointer-events: auto; border-bottom: 0; cursor: pointer; }
+.webgl-brand img { width: 34px; height: 34px; }
+.webgl-brand span { font-family: var(--font-luxury); font-size: 26px; letter-spacing: var(--tracking-wordmark); color: var(--paper-white); }
+@media (max-width: 700px) {
+  .webgl-brand img { width: 26px; height: 26px; }
+  .webgl-brand span { font-size: 20px; }
+}
+
+.webgl-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 38px; padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(237,232,221,0.18);
+  background: rgba(21,23,26,0.62);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--paper-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: var(--transition-control);
+  white-space: nowrap;
+  pointer-events: auto;
+}
+.webgl-pill:hover { border-color: var(--champagne-gold); color: var(--paper-white); }
+.webgl-pill:focus-visible { outline: 1px solid var(--focus-ring); outline-offset: 2px; }
+.webgl-pill.is-active { color: var(--champagne-gold); border-color: var(--champagne-gold); }
+
+/* "OFF" (3 chars) vs "ON" (2 chars) must not change the pill's width when
+   toggled. Every other part of the button (icon, the "Sound " text, padding)
+   is already constant, so pinning just the label to a fixed 3ch — the font
+   here is monospace, so ch is an exact per-character width, not an
+   approximation — is enough to keep the whole button's rendered width
+   constant at any breakpoint, without hardcoding a px value that would
+   mismatch the smaller mobile font/padding in the media query below. */
+[data-sound-label] { display: inline-block; width: 3ch; text-align: left; }
+
+.webgl-pill--primary {
+  position: relative;
+  overflow: hidden;
+  background: var(--champagne-gold);
+  border-color: var(--champagne-gold);
+  color: var(--vertex-black);
+  font-weight: var(--weight-mono);
+}
+/* Expanding circular hover-fill in place of a flat colour swap: a brass
+   disc grows from the pill's center on hover/focus rather than the whole
+   background instantly flipping. z-index:-1 (not a wrapping span around
+   the label) is enough to keep the disc behind the button's own text: per
+   CSS2.1's painting order, in-flow inline content — the plain text label
+   here — already paints before a z-index:auto/negative positioned sibling,
+   so no markup change is needed for the label to stay legible throughout.
+   overflow:hidden above clips the disc to the pill's own rounded shape. */
+.webgl-pill--primary::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 0; height: 0;
+  border-radius: 50%;
+  background: var(--aged-brass);
+  transform: translate(-50%, -50%);
+  transition: width var(--duration-slow) var(--ease-out-technical), height var(--duration-slow) var(--ease-out-technical);
+  z-index: -1;
+}
+.webgl-pill--primary:hover::before,
+.webgl-pill--primary:focus-visible::before { width: 260px; height: 260px; }
+.webgl-pill--primary:hover,
+.webgl-pill--primary:focus-visible { border-color: var(--aged-brass); }
+
+/* Descendant selector (not bare .webgl-readout) so pointer-events:none here
+   reliably beats .webgl-chrome-cluster > *'s pointer-events:auto above,
+   regardless of source order — this is read-only chrome, not a control, and
+   must never swallow a click meant for a 3D card rendered underneath it
+   (src/scene.js's drag/click handling listens on the canvas itself, so
+   anything that captures the pointerdown here means the canvas never sees
+   it at all). Border/background alpha and text color matched to .webgl-pill
+   so the clock doesn't read more transparent than the other header pills. */
+.webgl-chrome-cluster .webgl-readout { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid rgba(237,232,221,0.18); background: rgba(21,23,26,0.62); color: var(--paper-muted); font-size: 10px; letter-spacing: var(--tracking-label); text-transform: uppercase; pointer-events: none; }
+.webgl-readout strong { color: var(--paper-white); font-weight: var(--weight-mono); }
+
+.webgl-clock-colon { display: inline-block; animation: webgl-colon-blink 1s step-end infinite; }
+@keyframes webgl-colon-blink { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
+
+.webgl-tire { flex-shrink: 0; transform-origin: 50% 50%; }
+[data-sound-toggle][aria-pressed="true"] .webgl-tire { animation: webgl-tire-spin 1s linear infinite; }
+@keyframes webgl-tire-spin { to { transform: rotate(360deg); } }
+
+.webgl-nav-pill {
+  display: inline-flex; align-items: center;
+  border-radius: 999px;
+  overflow: hidden; /* clips every child to the pill's own rounded shape — the
+    actual fix for the "rectangle mark": a border-radius on the active button
+    alone isn't enough insurance on its own; this guarantees nothing square
+    can ever poke past the curve at either end regardless. */
+  border: 1px solid rgba(237,232,221,0.18);
+  background: rgba(21,23,26,0.62);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  pointer-events: auto;
+}
+.webgl-nav-pill button { padding: 0 16px; height: 38px; background: none; border: 0; border-right: 1px solid rgba(237,232,221,0.12); color: var(--paper-muted); font-family: var(--font-mono); font-size: 11px; letter-spacing: var(--tracking-label); text-transform: uppercase; cursor: pointer; transition: var(--transition-control); }
+.webgl-nav-pill button:last-child { border-right: 0; }
+.webgl-nav-pill button:hover { color: var(--paper-white); }
+.webgl-nav-pill button.is-active {
+  /* No border/box-shadow here on purpose — an inset box-shadow on a
+     rectangular <button> reads as a sharp corner-y outline sitting inside
+     the pill's rounded ends, which is exactly the artifact this replaces.
+     border-radius on the button itself keeps its own highlight rounded to
+     match the pill regardless of whether it's the first, last, or a middle
+     segment. */
+  color: #FFFFFF;
+  background: rgba(255,255,255,0.15);
+  text-shadow: 0 0 10px rgba(255,255,255,0.5);
+  border-radius: 999px;
+}
+
+.webgl-hint { align-self: center; font-size: 10px; letter-spacing: var(--tracking-label); text-transform: uppercase; color: rgba(237,232,221,0.35); pointer-events: none; transition: opacity var(--duration-base) var(--ease-standard); }
+.webgl-stage.is-list-view .webgl-hint,
+.webgl-stage.is-philosophy-view .webgl-hint,
+.webgl-stage.is-detail-view .webgl-hint,
+.webgl-stage.is-consultation-view .webgl-hint { opacity: 0; }
+
+/* The 3D Fleet / List View switcher only means something inside the Fleet
+   section — Our Philosophy has no "mode" of its own, so the pill fades out
+   rather than sitting there doing nothing (or worse, inviting a click that
+   silently does nothing useful while its own view is covered). A car detail
+   page and the Consultation page are the same case: still conceptually
+   "inside Fleet," but neither mode applies while either is open. */
+.webgl-mode-toggle { transition: opacity var(--duration-base) var(--ease-standard); }
+.webgl-stage.is-philosophy-view .webgl-mode-toggle,
+.webgl-stage.is-detail-view .webgl-mode-toggle,
+.webgl-stage.is-consultation-view .webgl-mode-toggle { opacity: 0; pointer-events: none; }
+
+/* Consultation is reachable from the header's own CTA and sits above every
+   other view (see the Consultation page z-index note below), so both the
+   button that opens it and the Fleet/Our Philosophy switcher hide while
+   it's open — unlike the mode toggle above, this is scoped to
+   is-consultation-view ONLY, not philosophy/detail, since the section
+   switcher is still meaningful there. Opacity, not display: keeps each
+   element's layout space reserved so the logo/clock/sound-toggle never
+   shift position when the CTA disappears. */
+.webgl-section-toggle { transition: opacity var(--duration-base) var(--ease-standard); }
+.webgl-stage.is-consultation-view .webgl-section-toggle { opacity: 0; pointer-events: none; }
+
+[data-open-consultation] { transition: opacity var(--duration-base) var(--ease-standard), var(--transition-control); }
+.webgl-stage.is-consultation-view [data-open-consultation] { opacity: 0; pointer-events: none; }
+
+/* List View: an opaque panel above the canvas+vignette (z-index 7, between
+   the canvas/vignette stack at 1/5 and the chrome at 10) so the floating
+   chrome — including the mode-toggle that opens this — stays usable the
+   whole time. Rows are populated from FLEET_DATA at boot (src/main.js);
+   .is-list-view on .webgl-stage is what src/main.js toggles to fade it in. */
+.webgl-list-view {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 110px var(--space-6) 100px;
+  background: rgba(10,10,12,0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  opacity: 0;
+  transform: translate3d(0, 10px, 0);
+  pointer-events: none;
+  transition: opacity var(--duration-base) var(--ease-standard), transform var(--duration-base) var(--ease-standard);
+  overflow-y: auto;
+  will-change: opacity, transform; /* this panel's own show/hide fade is the only thing it ever animates */
+}
+.webgl-stage.is-list-view .webgl-list-view {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  pointer-events: auto;
+}
+
+.webgl-list-head {
+  width: 100%;
+  max-width: 720px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-bottom: var(--space-4);
+  margin-bottom: var(--space-2);
+  border-bottom: 1px solid rgba(237,232,221,0.14);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+}
+.webgl-list-eyebrow { color: var(--paper-white); font-size: 13px; letter-spacing: var(--tracking-label); }
+.webgl-list-count { color: var(--paper-dim); font-size: 10px; letter-spacing: var(--tracking-label); }
+
+.webgl-list-body { width: 100%; max-width: 720px; display: flex; flex-direction: column; }
+
+.webgl-list-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  padding: 16px 6px;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid rgba(237,232,221,0.1);
+  color: inherit;
+  font-family: var(--font-mono);
+  text-align: left;
+  cursor: pointer;
+  transition: var(--transition-control);
+}
+.webgl-list-row:hover,
+.webgl-list-row:focus-visible {
+  border-bottom-color: var(--champagne-gold);
+  background: var(--gold-wash);
+}
+.webgl-list-row:focus-visible { outline: 1px solid var(--focus-ring); outline-offset: -2px; }
+
+.webgl-list-index { width: 3ch; font-size: 11px; letter-spacing: var(--tracking-label); color: var(--paper-dim); }
+.webgl-list-brand { flex: 1; font-size: 15px; font-weight: var(--weight-mono); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--paper-white); transition: var(--transition-control); }
+.webgl-list-row:hover .webgl-list-brand { color: var(--champagne-gold); }
+.webgl-list-model { font-size: 11px; letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--champagne-gold); }
+.webgl-list-arrow { flex-shrink: 0; color: var(--paper-dim); transition: var(--transition-control); }
+.webgl-list-row:hover .webgl-list-arrow { color: var(--champagne-gold); transform: translateX(3px); }
+
+@media (max-width: 700px) {
+  .webgl-list-view { padding: 150px var(--space-4) 140px; }
+  .webgl-list-brand { font-size: 13px; }
+}
+
+/* Our Philosophy: a full editorial page, not a quick-glance data browser like
+   List View — solid background rather than List View's frosted-glass one, on
+   purpose, since several of ITS OWN videos plus long-form reading over a busy
+   blurred 3D collage would fight each other for attention. Same z-index tier
+   as List View (7, mutually exclusive with it — only one section-tab/mode can
+   be showing at a time) and toggled the same way: .is-philosophy-view on
+   .webgl-stage, set in src/main.js. */
+.webgl-philosophy-view {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  background: var(--vertex-black);
+  opacity: 0;
+  transform: translate3d(0, 10px, 0);
+  pointer-events: none;
+  transition: opacity var(--duration-base) var(--ease-standard), transform var(--duration-base) var(--ease-standard);
+  overflow: hidden;
+  will-change: opacity, transform;
+}
+.webgl-stage.is-philosophy-view .webgl-philosophy-view {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  pointer-events: auto;
+}
+.phi-scroll {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding: 130px var(--space-6) 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 100px;
+  /* Promotes the actual scrolling surface to its own compositor layer, so
+     scrolling up to 7 simultaneously-decoding videos repaints/composites
+     just this layer rather than repeatedly touching the rest of the stage
+     underneath it on every scroll frame. */
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.phi-eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--text-label); }
+.phi-body { max-width: var(--measure-text); color: var(--paper-muted); line-height: 1.6; font-size: 15px; }
+.phi-body--wide { max-width: 640px; }
+
+.phi-hero {
+  width: 100%; max-width: 1100px;
+  display: grid; grid-template-columns: 1.3fr 0.9fr; gap: var(--space-8);
+  align-items: center;
+}
+.phi-headline { font-family: var(--font-luxury); font-weight: var(--weight-luxury); font-size: clamp(28px, 4vw, 44px); line-height: 1.15; color: var(--paper-white); margin: var(--space-3) 0 var(--space-5); }
+.phi-lead { font-family: var(--font-luxury); font-size: 19px; line-height: 1.5; color: var(--paper-white); max-width: var(--measure-text); margin-bottom: var(--space-4); }
+.phi-hero-text .phi-body { margin-bottom: var(--space-6); }
+
+.phi-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-5); }
+.phi-stat { display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--line-faint); padding-top: 10px; }
+.phi-stat-figure { font-family: var(--font-mono); font-weight: var(--weight-mono); font-size: 26px; color: var(--champagne-gold); }
+.phi-stat-value { font-variant-numeric: tabular-nums; }
+.phi-stat-figure small { font-size: 12px; color: var(--paper-dim); margin-left: 4px; text-transform: uppercase; letter-spacing: var(--tracking-label); }
+.phi-stat-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--paper-dim); }
+
+/* Entrance animation: replays on every visit to Our Philosophy, not just the
+   first — src/main.js removes/reflows/re-adds .phi-animate-in on each tab
+   click for that reason (a plain class left in place wouldn't re-trigger a
+   CSS animation). Resting state (no .phi-animate-in ancestor) is plain
+   opacity:1/no transform — the animation only ever plays "from" invisible
+   when explicitly triggered, so nothing can get stuck hidden if the class
+   somehow never arrives. Staggered by nth-child rather than a word/letter
+   split: splitting real copy into per-word spans fights text selection and
+   screen readers for an effect this brand's own motion-restraint rule
+   ("no gratuitous" — see README) doesn't call for.
+
+   Two-beat timing: the eyebrow+headline (nth-child 1-2) reveal essentially
+   together as one "headline" beat, then a deliberate 0.75s hold before the
+   lead/body/stats (nth-child 3-5) — the paragraph copy — reveals as a second
+   beat. That gap is the whole point of the "headline first" brief; a smaller
+   gap here would read as one continuous stagger, not two distinct beats. */
+@keyframes phi-fade-up { from { opacity: 0; transform: translate3d(0, 30px, 0) scale(0.98); } to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); } }
+.phi-animate-in .phi-hero-text > *:nth-child(1) { animation: phi-fade-up 0.9s var(--ease-standard) 0s both; will-change: opacity, transform; }
+.phi-animate-in .phi-hero-text > *:nth-child(2) { animation: phi-fade-up 0.9s var(--ease-standard) 0.15s both; will-change: opacity, transform; }
+.phi-animate-in .phi-hero-text > *:nth-child(3) { animation: phi-fade-up 0.9s var(--ease-standard) 0.9s both; will-change: opacity, transform; }
+.phi-animate-in .phi-hero-text > *:nth-child(4) { animation: phi-fade-up 0.9s var(--ease-standard) 1.05s both; will-change: opacity, transform; }
+.phi-animate-in .phi-hero-text > *:nth-child(5) { animation: phi-fade-up 0.9s var(--ease-standard) 1.2s both; will-change: opacity, transform; }
+.phi-animate-in .phi-hero-video { animation: phi-fade-up 1s var(--ease-standard) 0.15s both; will-change: opacity, transform; }
+
+.phi-hero-video, .phi-video-tile, .phi-reveal-media {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line-faint);
+  background: var(--graphite);
+}
+.phi-hero-video, .phi-video-tile, .phi-reveal-media { aspect-ratio: 9 / 16; border-radius: 2px; }
+.phi-hero-video video, .phi-video-tile video, .phi-reveal-media video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.phi-video-scrim {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(11,12,14,0) 45%, rgba(11,12,14,0.88) 100%);
+  pointer-events: none;
+}
+
+.phi-section { width: 100%; max-width: 1100px; }
+.phi-section-head { display: flex; align-items: baseline; justify-content: space-between; padding-bottom: var(--space-4); margin-bottom: var(--space-5); border-bottom: 1px solid var(--line-faint); }
+.phi-meta { font-family: var(--font-mono); font-size: 10px; letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--paper-dim); }
+
+.phi-video-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--space-4); }
+.phi-video-caption { position: absolute; left: 0; right: 0; bottom: 0; padding: 14px; display: flex; flex-direction: column; gap: 3px; }
+.phi-video-tech { font-family: var(--font-mono); font-size: 9px; letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--champagne-gold); }
+.phi-video-title { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.02em; color: var(--paper-white); }
+
+/* Scroll-reveal, shared by every media block on the page (craft tiles, the
+   closing Reveal clip, the two workshop photos) except .phi-hero-video —
+   that one is above the fold with no scrolling involved, so it uses the
+   .phi-animate-in keyframe system instead (see below) rather than this
+   IntersectionObserver-driven one. src/main.js observes each against
+   .phi-scroll (the actual scrolling ancestor — this panel isn't page-scroll,
+   so the default viewport root would never fire), adds .is-revealed and
+   starts playback (for video) once it crosses into view, and resets +
+   re-observes all of them from scratch every time the user re-enters Our
+   Philosophy — so leaving and coming back replays the whole sequence. */
+.phi-video-tile, .phi-reveal-media, .phi-reveal-img {
+  opacity: 0; transform: translate3d(0, 24px, 0) scale(0.96);
+  transition: opacity 0.7s var(--ease-standard), transform 0.7s var(--ease-standard);
+  will-change: opacity, transform;
+}
+.phi-video-tile.is-revealed, .phi-reveal-media.is-revealed, .phi-reveal-img.is-revealed {
+  opacity: 1; transform: translate3d(0, 0, 0) scale(1);
+}
+
+/* The closing "payoff" moment after the process grid — media+text side by
+   side like the hero, but reversed (media first) and considerably smaller,
+   so it reads as a coda, not a second hero. */
+.phi-reveal { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: var(--space-8); align-items: center; }
+.phi-reveal-media { max-width: 300px; }
+.phi-reveal-text { display: flex; flex-direction: column; gap: var(--space-3); }
+
+.phi-partner-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--space-4); margin-bottom: var(--space-4); }
+.phi-partner-slot { aspect-ratio: 16 / 10; border: 1px dashed var(--line-structural); border-radius: 2px; background: rgba(46,59,71,0.08); position: relative; }
+.phi-partner-slot::before, .phi-partner-slot::after {
+  content: ''; position: absolute; width: 10px; height: 10px; border: 1px solid var(--line-structural);
+}
+.phi-partner-slot::before { top: 6px; left: 6px; border-right: 0; border-bottom: 0; }
+.phi-partner-slot::after { bottom: 6px; right: 6px; border-left: 0; border-top: 0; }
+.phi-note { font-family: var(--font-mono); font-size: 11px; color: var(--paper-dim); font-style: italic; }
+
+.phi-workshop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); margin-top: var(--space-6); }
+.phi-workshop-grid img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border: 1px solid var(--line-faint); border-radius: 2px; }
+
+/* Full-width band, not capped at the same 1100px as the sections above it —
+   a footer reads as the page's edge, not another content column. Uses
+   var(--vertex-black) rather than the requested #0A0A0C literal: they're a
+   hair apart and the brief also said "tailored strictly to Vertex design
+   system tokens," which the existing token satisfies without introducing a
+   near-duplicate off-palette value. */
+.phi-site-footer {
+  width: 100%;
+  background: var(--vertex-black);
+  border-top: 1px solid var(--line-faint);
+  padding-top: 40px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-6);
+  font-family: var(--font-mono);
+}
+.phi-footer-col { display: flex; flex-direction: column; gap: 14px; min-width: 180px; }
+.phi-footer-logo { display: flex; align-items: center; gap: 10px; }
+.phi-footer-logo img { width: 20px; height: 20px; }
+.phi-footer-logo span { font-family: var(--font-luxury); font-size: 15px; letter-spacing: var(--tracking-wordmark); color: var(--paper-white); }
+.phi-footer-copyright { font-size: 11px; letter-spacing: 0.02em; color: var(--paper-dim); }
+.phi-footer-links { align-items: flex-start; }
+.phi-footer-links a,
+.phi-footer-contact a {
+  font-size: 11px; letter-spacing: var(--tracking-label); text-transform: uppercase;
+  color: var(--paper-muted); transition: var(--transition-control);
+}
+.phi-footer-links a:hover,
+.phi-footer-contact a:hover { color: var(--champagne-gold); }
+.phi-footer-socials { display: flex; gap: var(--space-4); }
+.phi-footer-contact .phi-footer-email { color: var(--champagne-gold); }
+
+@media (max-width: 900px) {
+  .phi-hero { grid-template-columns: 1fr; }
+  .phi-hero-video { max-width: 320px; margin: 0 auto; }
+  .phi-video-grid { grid-template-columns: repeat(2, 1fr); }
+  .phi-reveal { grid-template-columns: 1fr; }
+  .phi-reveal-media { max-width: 260px; margin: 0 auto; }
+  .phi-partner-row { grid-template-columns: repeat(2, 1fr); }
+  .phi-workshop-grid { grid-template-columns: 1fr; }
+  .phi-site-footer { flex-direction: column; gap: var(--space-5); }
+}
+
+/* ==========================================================================
+   Car detail page — a fourth full panel, opened from a 3D card click or a
+   List View row click (src/detailView.js). Sits ABOVE both the 3D grid
+   (canvas, z-index 1) and List View (z-index 7): it can be opened from
+   either one, so — unlike Our Philosophy just above, which shares List
+   View's own tier and swaps with it — Detail must cover whichever was
+   showing underneath rather than replace its state. Closing it therefore
+   needs no restore step: nothing under it was ever changed.
+
+   Content is rebuilt per car from scratch (innerHTML), not static markup
+   like Our Philosophy — see src/detailView.js for why that also makes the
+   "replay every visit" requirement close to free. Deliberately reuses Our
+   Philosophy's .phi-eyebrow/.phi-meta/.phi-body/.phi-section-head/.phi-stat*
+   atoms rather than duplicating near-identical CSS a second time — only
+   genuinely new structure (hero, two-column overview, gallery grid, feature
+   banner) gets its own .detail-* classes below. */
+.webgl-detail-view {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  background: var(--vertex-black);
+  opacity: 0;
+  transform: translate3d(0, 10px, 0);
+  pointer-events: none;
+  transition: opacity var(--duration-base) var(--ease-standard), transform var(--duration-base) var(--ease-standard);
+  will-change: opacity, transform;
+}
+.webgl-stage.is-detail-view .webgl-detail-view {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  pointer-events: auto;
+}
+
+/* Positioned against .webgl-detail-view itself (not inside .detail-scroll),
+   so it never scrolls away with the case-study content — the "sticky back
+   button" brief, achieved without fighting position:sticky's offset math
+   against a scroll container that also carries top padding. top:110px
+   matches .webgl-list-view's own top clearance (below) so it lines up with
+   where this panel's content starts, rather than a value invented fresh. */
+.detail-back {
+  position: absolute;
+  top: 110px;
+  left: var(--space-6);
+  z-index: 2;
+}
+.detail-back svg { width: 14px; height: 14px; }
+/* .webgl-pill unconditionally sets pointer-events:auto on itself (needed so
+   header pills stay clickable inside .webgl-chrome-cluster's pointer-events:
+   none), which quietly re-enables .detail-back even while .webgl-detail-view
+   is hidden (opacity:0 doesn't affect hit-testing) — that alone would be
+   harmless, except .consultation-back sits at this EXACT same top/left spot
+   one panel up (z-index 9 vs. 8) and has the identical problem, so whichever
+   panel is closed still has a fully invisible, fully clickable "ghost" back
+   button sitting on top of the other one's real button. Scope pointer-events
+   back down to each button explicitly rather than touching the shared
+   .webgl-pill rule everything else here still depends on. */
+.webgl-stage:not(.is-detail-view) .detail-back { pointer-events: none; }
+
+.detail-scroll {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding: 110px var(--space-6) 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 100px;
+  transform: translateZ(0); /* own compositor layer for the scrolling surface — see .phi-scroll */
+  will-change: transform;
+}
+/* Every section caps at the same 1100px column as Our Philosophy, except the
+   feature banner — that one deliberately omits max-width so it reads as a
+   full-bleed break from the column, same technique .phi-site-footer already
+   uses one section back. */
+.detail-hero, .detail-overview, .detail-gallery { width: 100%; max-width: 1100px; }
+.detail-feature { width: 100%; }
+
+/* font-weight set explicitly on both — this is an <h1>, and the browser's
+   default h1{font-weight:bold} would otherwise inherit down into every
+   child span. Italiana (--font-luxury) tolerates that silently (no bold
+   face loaded, so it just renders regular-looking), but IBM Plex Mono
+   (--font-mono, used by .detail-headline-sep below) does NOT: only weights
+   400/500/600 ever get requested from Google Fonts on this page, so an
+   inherited 700 has no face to render at all — Chromium shows tofu glyph
+   boxes for the "/" characters instead of falling back gracefully. Found by
+   actually screenshotting the page, not by reading the CSS. */
+.detail-headline { font-family: var(--font-luxury); font-weight: var(--weight-luxury); font-size: clamp(32px, 5vw, 56px); line-height: 1.08; color: var(--paper-white); margin: var(--space-4) 0 0; }
+.detail-headline-sep { color: var(--paper-dim); font-family: var(--font-mono); font-weight: var(--weight-mono); font-size: 0.5em; margin: 0 0.15em; }
+.detail-headline-donor { color: var(--champagne-gold); }
+
+.detail-hero-media { position: relative; width: 100%; aspect-ratio: 16 / 7; overflow: hidden; border: 1px solid var(--line-faint); border-radius: 2px; margin-top: var(--space-6); background: var(--graphite); }
+.detail-hero-media video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.detail-hero-scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,12,14,0) 55%, rgba(11,12,14,0.55) 100%); pointer-events: none; }
+
+/* Text reveal: staggered entrance for the hero's 3 direct children (eyebrow,
+   headline, media). Reuses the existing phi-fade-up keyframe rather than a
+   near-duplicate — an animation curve is not view-specific. No gating class
+   needed the way Our Philosophy's .phi-animate-in is: this content is always
+   freshly inserted (never a persistent node the animation must be manually
+   restarted on), so it plays from scratch on every open by construction. */
+.detail-hero > *:nth-child(1) { animation: phi-fade-up 0.9s var(--ease-standard) 0s both; will-change: opacity, transform; }
+.detail-hero > *:nth-child(2) { animation: phi-fade-up 0.9s var(--ease-standard) 0.15s both; will-change: opacity, transform; }
+.detail-hero > *:nth-child(3) { animation: phi-fade-up 1s var(--ease-standard) 0.35s both; will-change: opacity, transform; }
+
+.detail-overview { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: var(--space-8); align-items: start; }
+.detail-history p + p { margin-top: var(--space-4); }
+
+.detail-engine-row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-4); margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--line-faint); }
+.detail-engine-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--paper-dim); }
+.detail-engine-value { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.02em; color: var(--paper-white); text-align: right; }
+
+/* Asymmetric grid: a repeating every-6 rhythm (one 2x2 hero tile, one 2x1
+   wide tile, the rest single cells) that stays sensible whether a car has 5
+   or 6 grid tiles (6-7 photos minus the one held back for the feature
+   banner) — sized by nth-child, not by content, so it needs no per-tile
+   markup beyond a plain, uniform .detail-gallery-tile. */
+.detail-gallery-grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 160px; gap: var(--space-4); }
+.detail-gallery-tile {
+  position: relative; overflow: hidden;
+  border: 1px solid var(--line-faint); border-radius: 2px; background: var(--graphite);
+  opacity: 0; transform: translate3d(0, 24px, 0) scale(0.96);
+  transition: opacity 0.7s var(--ease-standard), transform 0.7s var(--ease-standard);
+  will-change: opacity, transform;
+}
+.detail-gallery-tile.is-revealed { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+.detail-gallery-tile img, .detail-gallery-tile video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.detail-gallery-tile:nth-child(6n+1) { grid-column: span 2; grid-row: span 2; }
+.detail-gallery-tile:nth-child(6n+4) { grid-column: span 2; }
+
+.detail-feature {
+  position: relative; aspect-ratio: 21 / 9; overflow: hidden;
+  border-top: 1px solid var(--line-faint); border-bottom: 1px solid var(--line-faint);
+  opacity: 0; transform: translate3d(0, 24px, 0) scale(0.98);
+  transition: opacity 0.7s var(--ease-standard), transform 0.7s var(--ease-standard);
+  will-change: opacity, transform;
+}
+.detail-feature.is-revealed { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+.detail-feature-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.detail-feature-scrim { position: absolute; inset: 0; background: linear-gradient(0deg, rgba(11,12,14,0.75) 0%, rgba(11,12,14,0) 45%); pointer-events: none; }
+.detail-feature-caption { position: absolute; left: var(--space-6); bottom: var(--space-5); font-family: var(--font-mono); font-size: 11px; letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--paper-white); }
+
+@media (max-width: 900px) {
+  .detail-overview { grid-template-columns: 1fr; gap: var(--space-6); }
+  .detail-gallery-grid { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 140px; }
+  .detail-gallery-tile:nth-child(6n+1) { grid-column: span 2; grid-row: span 1; }
+  .detail-gallery-tile:nth-child(6n+4) { grid-column: span 1; }
+  .detail-feature { aspect-ratio: 4 / 3; }
+}
+@media (max-width: 700px) {
+  .detail-back { top: 150px; }
+  .detail-scroll { padding: 150px var(--space-4) 80px; }
+}
+
+/* ==========================================================================
+   Consultation page — "Commission Your Legacy" / Private Atelier
+   Consultation. Opened from the header's "Request a build slot" pill
+   (src/main.js), reachable from ANY other view (Fleet, List, Our Philosophy,
+   or an open car detail page), so it sits ABOVE all of them — z-index 9,
+   higher even than the car detail page's 8. Static content, like Our
+   Philosophy (not per-item data like a car detail page), so
+   src/consultationView.js resets and re-observes this same persistent
+   markup on every open (the .consultation-animate-in remove/reflow/re-add
+   trick, same as .phi-animate-in) rather than rebuilding it from scratch.
+
+   Red (--corsa-red) is scoped deliberately narrow here: the primary CTA, its
+   hover state, the transaction notice, and form focus/active indicators.
+   Gold stays the site's one general-purpose accent everywhere else — this
+   isn't relaxing the "gold rationed to a single primary CTA" rule, it's
+   applying the identical restraint to a second, distinct color instead. */
+.webgl-consultation-view {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  background: var(--vertex-black);
+  opacity: 0;
+  transform: translate3d(0, 10px, 0);
+  pointer-events: none;
+  transition: opacity var(--duration-base) var(--ease-standard), transform var(--duration-base) var(--ease-standard);
+  will-change: opacity, transform;
+}
+.webgl-stage.is-consultation-view .webgl-consultation-view {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  pointer-events: auto;
+}
+
+.consultation-back {
+  position: absolute;
+  top: 110px;
+  left: var(--space-6);
+  z-index: 2;
+}
+.consultation-back svg { width: 14px; height: 14px; }
+/* See the matching note on .detail-back: this sits at the identical
+   top/left spot one panel down (z-index 8), and .webgl-pill's own
+   pointer-events:auto would otherwise leave BOTH back buttons independently
+   clickable regardless of which panel is actually open. */
+.webgl-stage:not(.is-consultation-view) .consultation-back { pointer-events: none; }
+
+.consultation-scroll {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding: 110px var(--space-6) 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 100px;
+  transform: translateZ(0);
+  will-change: transform;
+}
+.consultation-hero, .consultation-experience, .consultation-terms, .consultation-form-section {
+  width: 100%;
+  max-width: 900px;
+}
+
+/* "High-tech" treatment: the exact Orbitron/weight-tech/tracking-tech/gold
+   recipe css/site.css's .headline .line-tech already uses for the hero's
+   second line, reused here (not a new one-off) at the same --size-hero-tech
+   scale so "Commission Your Legacy" reads as immediately, unmissably big. */
+.consultation-title { font-family: var(--font-tech); font-weight: var(--weight-tech); font-size: var(--size-hero-tech); line-height: var(--leading-tech); letter-spacing: var(--tracking-tech); text-transform: uppercase; color: var(--champagne-gold); margin: var(--space-4) 0 var(--space-3); }
+.consultation-subtitle { font-family: var(--font-mono); font-weight: var(--weight-mono); font-size: 13px; letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--champagne-gold); margin: 0 0 var(--space-6); }
+.consultation-intro { margin: 0; }
+
+/* Staggered entrance — same phi-fade-up curve, same two-beat timing, and
+   the same remove/reflow/re-add restart trick as Our Philosophy's hero (see
+   replayHeroEntrance in src/consultationView.js). Two beats, not one even
+   stagger: eyebrow+title (nth-child 1-2) reveal together as the headline
+   beat, then the identical 0.75s hold Our Philosophy uses before title+intro
+   (nth-child 3-4) lands as the second beat — same gap, just four children
+   instead of five.
+
+   Compound selector (.consultation-hero.consultation-animate-in), NOT a
+   descendant one: replayHeroEntrance toggles consultation-animate-in on
+   .consultation-hero itself, not on a separate wrapper around it. Our
+   Philosophy's own version reads as a descendant selector
+   (.phi-animate-in .phi-hero-text > *) only because phi-animate-in lands on
+   .phi-hero while the animated children belong to the nested .phi-hero-text
+   — two different elements. Here there's no such nested wrapper, so the
+   trigger class and the animated children's parent are the same node; a
+   descendant selector can never match two classes sitting on one element.
+
+   No permanent opacity:0 base rule on purpose: resting state (no
+   .consultation-animate-in class) stays fully visible, so nothing can get
+   stuck invisible if the class somehow never arrives — the animation only
+   ever plays "from" hidden when explicitly triggered. */
+.consultation-hero.consultation-animate-in > *:nth-child(1) { animation: phi-fade-up 0.9s var(--ease-standard) 0s both; will-change: opacity, transform; }
+.consultation-hero.consultation-animate-in > *:nth-child(2) { animation: phi-fade-up 0.9s var(--ease-standard) 0.15s both; will-change: opacity, transform; }
+.consultation-hero.consultation-animate-in > *:nth-child(3) { animation: phi-fade-up 0.9s var(--ease-standard) 0.9s both; will-change: opacity, transform; }
+.consultation-hero.consultation-animate-in > *:nth-child(4) { animation: phi-fade-up 0.9s var(--ease-standard) 1.05s both; will-change: opacity, transform; }
+
+.consultation-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-5); margin-top: var(--space-2); }
+.consultation-card {
+  background: var(--graphite); border: 1px solid var(--line-faint); border-radius: 2px;
+  padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-2);
+  opacity: 0; transform: translate3d(0, 24px, 0) scale(0.97);
+  transition: opacity 0.7s var(--ease-standard), transform 0.7s var(--ease-standard);
+  will-change: opacity, transform;
+}
+.consultation-card.is-revealed { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+.consultation-card-index { font-family: var(--font-mono); font-size: 12px; letter-spacing: var(--tracking-label); color: var(--champagne-gold); }
+.consultation-card-title { font-family: var(--font-luxury); font-weight: var(--weight-luxury); font-size: 22px; color: var(--paper-white); margin: 0; }
+.consultation-card-body { font-family: var(--font-body); font-size: 14px; line-height: 1.6; color: var(--paper-muted); margin: 0; }
+
+/* Sleek glass layer — same frosted-glass recipe as .webgl-pill (the site's
+   one established "glass" texture), applied here to a full content block
+   rather than a small floating control, per the brief's "dark glass layers"
+   ask. Left border in red: the one place besides the CTA this page uses it,
+   flagging "this paragraph is about money" at a glance. */
+.consultation-quote {
+  margin: 0 0 var(--space-5);
+  padding: var(--space-8);
+  background: rgba(21,23,26,0.62);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(237,232,221,0.14);
+  border-left: 3px solid var(--corsa-red);
+  border-radius: 2px;
+  opacity: 0; transform: translate3d(0, 24px, 0);
+  transition: opacity 0.7s var(--ease-standard), transform 0.7s var(--ease-standard);
+  will-change: opacity, transform;
+}
+.consultation-quote.is-revealed { opacity: 1; transform: translate3d(0, 0, 0); }
+.consultation-quote-amount { font-family: var(--font-mono); font-weight: var(--weight-numeric); font-size: clamp(28px, 4vw, 40px); color: var(--paper-white); margin: 0 0 var(--space-2); }
+/* .phi-stat-value (the count-up target, see panelReveal.js's
+   animateStatCounter) is a sibling of the currency label below, so the
+   label keeps its own class instead of a bare "span" selector — a generic
+   descendant selector would otherwise also catch the number and shrink it
+   to 14px mid-count. */
+.consultation-quote-currency { font-size: 14px; color: var(--paper-dim); letter-spacing: var(--tracking-label); margin-left: 6px; }
+.consultation-quote-body { font-family: var(--font-body); font-size: 15px; line-height: 1.6; color: var(--paper-muted); margin: 0; max-width: var(--measure-text); }
+
+.consultation-notice {
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.03em; line-height: 1.6;
+  color: var(--paper-white); background: var(--red-wash); border: 1px solid var(--line-alert);
+  border-radius: 2px; padding: var(--space-4) var(--space-5); margin: 0;
+  opacity: 0; transform: translate3d(0, 24px, 0);
+  transition: opacity 0.7s var(--ease-standard), transform 0.7s var(--ease-standard);
+  will-change: opacity, transform;
+}
+.consultation-notice.is-revealed { opacity: 1; transform: translate3d(0, 0, 0); }
+
+.consultation-form { display: flex; flex-direction: column; gap: var(--space-5); }
+.consultation-field {
+  display: flex; flex-direction: column; gap: 8px;
+  opacity: 0; transform: translate3d(0, 20px, 0);
+  transition: opacity 0.6s var(--ease-standard), transform 0.6s var(--ease-standard);
+  will-change: opacity, transform;
+}
+.consultation-field.is-revealed { opacity: 1; transform: translate3d(0, 0, 0); }
+.consultation-field label { font-family: var(--font-mono); font-size: 11px; letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--paper-dim); }
+.consultation-field input, .consultation-field select, .consultation-field textarea {
+  background: var(--graphite); border: 1px solid var(--line-faint); border-radius: 2px;
+  padding: 14px 16px; color: var(--paper-white); font-family: var(--font-body); font-size: 15px;
+  transition: var(--transition-control);
+}
+.consultation-field textarea { resize: vertical; min-height: 100px; }
+.consultation-field input::placeholder, .consultation-field textarea::placeholder { color: var(--paper-dim); }
+/* Active form indicator — deliberately red here rather than the site's
+   usual gold focus ring, per the brief's own "active form indicators" ask
+   scoped to this page specifically. */
+.consultation-field input:focus-visible,
+.consultation-field select:focus-visible,
+.consultation-field textarea:focus-visible {
+  outline: none; border-color: var(--corsa-red);
+  box-shadow: 0 0 0 3px var(--red-wash);
+}
+
+.consultation-cta-row {
+  display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3);
+  opacity: 0; transform: translate3d(0, 20px, 0);
+  transition: opacity 0.6s var(--ease-standard), transform 0.6s var(--ease-standard);
+  will-change: opacity, transform;
+}
+.consultation-cta-row.is-revealed { opacity: 1; transform: translate3d(0, 0, 0); }
+.consultation-cta {
+  position: relative;
+  overflow: hidden;
+  background: var(--action-danger-bg); color: var(--action-danger-fg);
+  border: 1px solid var(--action-danger-bg);
+  font-family: var(--font-mono); font-weight: var(--weight-mono); font-size: 13px;
+  letter-spacing: var(--tracking-cta); text-transform: uppercase;
+  padding: 18px 32px; border-radius: 2px; cursor: pointer;
+  transition: var(--transition-control);
+}
+/* Same expanding circular hover-fill as .webgl-pill--primary above (see its
+   comment for why z-index:-1 alone keeps the label legible with no markup
+   change) — a darker-red disc grows from center on hover/focus. Sized
+   larger than the pill's since this button runs much wider; overflow:hidden
+   above clips it to the button's own near-square corners either way. */
+.consultation-cta::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 0; height: 0;
+  border-radius: 50%;
+  background: var(--action-danger-bg-hover);
+  transform: translate(-50%, -50%);
+  transition: width var(--duration-slow) var(--ease-out-technical), height var(--duration-slow) var(--ease-out-technical);
+  z-index: -1;
+}
+.consultation-cta:not(:disabled):hover::before,
+.consultation-cta:not(:disabled):focus-visible::before { width: 700px; height: 700px; }
+.consultation-cta:not(:disabled):hover,
+.consultation-cta:not(:disabled):focus-visible { border-color: var(--action-danger-bg-hover); }
+.consultation-cta:focus-visible { outline: 2px solid var(--corsa-red); outline-offset: 2px; }
+.consultation-cta:disabled { background: var(--action-disabled-bg); border-color: var(--action-disabled-bg); color: var(--action-disabled-fg); cursor: default; }
+.consultation-form-note { font-family: var(--font-mono); font-size: 11px; color: var(--paper-dim); margin: 0; }
+
+@media (max-width: 900px) {
+  .consultation-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 700px) {
+  .consultation-back { top: 150px; }
+  .consultation-scroll { padding: 150px var(--space-4) 80px; }
+}
+
+/* The chrome only ever makes sense floating over a live WebGL canvas — until
+   .is-webgl-active is confirmed (by src/main.js, only after the scene
+   actually renders), keep it and every overlay panel out of the way so a
+   failed/mid-init canvas never shows broken chrome with nothing working
+   underneath it. */
+.webgl-stage:not(.is-webgl-active) .webgl-chrome,
+.webgl-stage:not(.is-webgl-active) .webgl-vignette,
+.webgl-stage:not(.is-webgl-active) .webgl-list-view,
+.webgl-stage:not(.is-webgl-active) .webgl-philosophy-view,
+.webgl-stage:not(.is-webgl-active) .webgl-detail-view,
+.webgl-stage:not(.is-webgl-active) .webgl-consultation-view {
+  display: none;
+}
+
+/* The real fallback site: fixed full-viewport, scrolls on its own axis so the
+   html/body lock above never traps it. Sits beneath .webgl-stage in the
+   stacking order — safe to leave in the DOM at all times because the stage
+   is pointer-events:none whenever it isn't confirmed active (see above). */
+.site-fallback {
+  position: fixed;
+  inset: 0;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--vertex-black);
+  z-index: 5;
+}
+.site-fallback[hidden] { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .webgl-clock-colon { animation: none; }
+  [data-sound-toggle][aria-pressed="true"] .webgl-tire { animation: none; }
+  .webgl-list-view, .webgl-philosophy-view, .webgl-detail-view, .webgl-consultation-view, .webgl-hint, .webgl-mode-toggle, .webgl-section-toggle, [data-open-consultation] { transition: none; }
+  .phi-animate-in .phi-hero-text > *, .phi-animate-in .phi-hero-video { animation: none; }
+  .phi-video-tile, .phi-reveal-media, .phi-reveal-img { transition: none; }
+  .detail-hero > * { animation: none; }
+  .detail-gallery-tile, .detail-feature { transition: none; }
+  .consultation-hero.consultation-animate-in > * { animation: none; }
+  .consultation-card, .consultation-quote, .consultation-notice, .consultation-field, .consultation-cta-row { transition: none; }
+  .webgl-pill--primary::before, .consultation-cta::before { transition: none; }
+}
+
+@media (max-width: 700px) {
+  .webgl-chrome { padding: var(--space-4); gap: var(--space-4); }
+  .webgl-chrome-row { flex-wrap: wrap; row-gap: var(--space-2); }
+  .webgl-chrome-cluster { flex-wrap: wrap; row-gap: var(--space-2); }
+  .webgl-readout { display: none; }
+  .webgl-pill { height: 34px; padding: 0 12px; font-size: 10px; }
+  .webgl-nav-pill button { height: 34px; padding: 0 12px; font-size: 10px; }
+  .webgl-icon-btn { width: 34px; height: 34px; }
+  .webgl-hint { font-size: 9px; text-align: center; }
+}

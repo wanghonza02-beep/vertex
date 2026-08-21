@@ -1,0 +1,70 @@
+:root{
+  /* ---- Base palette (from the Vertex brand concept) ---- */
+  --vertex-black:#0B0C0E;
+  --graphite:#1A1C1F;
+  --champagne-gold:#C9A66B;
+  --aged-brass:#8C7248;
+  --paper-white:#EDE8DD;
+  --blueprint-line:#2E3B47;
+  --corsa-red:#C1272D;
+
+  /* ---- Derived neutrals (tints of the base palette, no new hues) ---- */
+  --graphite-raised:#212429;      /* one step above graphite for nested panels */
+  --paper-muted:#B9B4A7;          /* body / secondary copy */
+  --paper-dim:#7C786F;            /* tertiary, captions, disabled label */
+  --blueprint-faint:#1F2830;      /* hairlines inside dark panels */
+  --gold-wash:rgba(201,166,107,0.12);
+  --gold-wash-strong:rgba(201,166,107,0.22);
+  --red-wash:rgba(193,39,45,0.12);
+  --red-wash-strong:rgba(193,39,45,0.22);
+  --corsa-red-dark:#8B1C20;       /* corsa-red's darkened hover pair, same ratio as aged-brass:champagne-gold */
+  --scrim:rgba(11,12,14,0.82);
+
+  /* ---- Semantic aliases: surfaces ---- */
+  --surface-page:var(--vertex-black);
+  --surface-card:var(--graphite);
+  --surface-raised:var(--graphite-raised);
+  --surface-inverse:var(--paper-white);
+  --surface-scrim:var(--scrim);
+
+  /* ---- Semantic aliases: text ---- */
+  --text-primary:var(--paper-white);
+  --text-body:var(--paper-muted);
+  --text-tertiary:var(--paper-dim);
+  --text-accent:var(--champagne-gold);
+  --text-label:var(--aged-brass);
+  --text-on-gold:var(--vertex-black);
+  --text-on-paper:var(--vertex-black);
+  --text-alert:var(--corsa-red);
+  --text-disabled:#4A4A46;
+
+  /* ---- Semantic aliases: lines ---- */
+  --line-structural:var(--blueprint-line);
+  --line-faint:var(--blueprint-faint);
+  --line-accent:var(--champagne-gold);
+  --line-alert:var(--corsa-red);
+
+  /* ---- Semantic aliases: interactive ---- */
+  --action-primary-bg:var(--champagne-gold);
+  --action-primary-bg-hover:var(--aged-brass);
+  --action-primary-fg:var(--vertex-black);
+  --action-secondary-fg:var(--paper-white);
+  --action-secondary-line:var(--blueprint-line);
+  --action-secondary-line-hover:var(--champagne-gold);
+  --action-ghost-fg:var(--paper-muted);
+  --action-disabled-bg:#2A2C30;
+  --action-disabled-fg:#5C5C58;
+  --focus-ring:var(--champagne-gold);
+  /* Reserved for the Consultation page's CTA — gold stays "the" primary
+     action color everywhere else on the site; red is scoped to this one
+     high-commitment, high-dollar action rather than used as a second
+     general-purpose primary. */
+  --action-danger-bg:var(--corsa-red);
+  --action-danger-bg-hover:var(--corsa-red-dark);
+  --action-danger-fg:var(--paper-white);
+
+  /* ---- Signal ---- */
+  --signal-rare:var(--corsa-red);      /* 1-of-1 / rare-donor tags, motion indicators */
+  --signal-available:var(--champagne-gold);
+  --signal-sold:var(--paper-dim);
+}

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+<defs><pattern id="g" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#2E3B47" stroke-width="1" opacity="0.35"/></pattern></defs>
+<rect width="400" height="400" fill="url(#g)"/>
+<rect x="172" y="266" width="56" height="26" fill="none" stroke="#EDE8DD" stroke-width="1.25"/>
+<circle cx="186" cy="279" r="2.5" fill="#EDE8DD"/><circle cx="214" cy="279" r="2.5" fill="#EDE8DD"/>
+<g fill="none" stroke="#EDE8DD" stroke-width="1.5">
+<circle cx="200" cy="200" r="150"/>
+<circle cx="200" cy="200" r="95"/>
+<path d="M200,170 L200,110 M255.5,231.7 L297,257 M144.5,231.7 L103,257 M255.5,168.3 L297,143 M144.5,168.3 L103,143"/>
+</g>
+<g fill="none" stroke="#C9A66B" stroke-width="1.25">
+<circle cx="200" cy="200" r="26"/>
+<circle cx="200" cy="200" r="6" fill="#C9A66B"/>
+</g>
+<g stroke="#2E3B47" stroke-width="1" opacity="0.7">
+<path d="M14,14 V26 M14,14 H26"/><path d="M386,14 V26 M386,14 H374"/>
+<path d="M14,386 V374 M14,386 H26"/><path d="M386,386 V374 M386,386 H374"/>
+</g>
+</svg>
