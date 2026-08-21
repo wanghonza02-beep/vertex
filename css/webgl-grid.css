@@ -126,6 +126,16 @@ html, body {
 .webgl-pill--primary {
   position: relative;
   overflow: hidden;
+  /* isolation:isolate forces this element to establish its OWN stacking
+     context despite z-index:auto — without it, ::before's z-index:-1 below
+     doesn't stay local to this button at all: position:relative alone does
+     NOT create a stacking context, so the negative z-index escapes to
+     whichever distant ancestor DOES establish one (here, .webgl-chrome at
+     z-index:10), painting the disc behind the entire chrome instead of
+     just behind this button's own label. Caught only by actually looking
+     at a screenshot — computed-style checks on width/height still read
+     "correct" even while completely invisible. */
+  isolation: isolate;
   background: var(--champagne-gold);
   border-color: var(--champagne-gold);
   color: var(--vertex-black);
@@ -723,7 +733,7 @@ html, body {
    recipe css/site.css's .headline .line-tech already uses for the hero's
    second line, reused here (not a new one-off) at the same --size-hero-tech
    scale so "Commission Your Legacy" reads as immediately, unmissably big. */
-.consultation-title { font-family: var(--font-tech); font-weight: var(--weight-tech); font-size: var(--size-hero-tech); line-height: var(--leading-tech); letter-spacing: var(--tracking-tech); text-transform: uppercase; color: var(--champagne-gold); margin: var(--space-4) 0 var(--space-3); }
+.consultation-title { font-family: var(--font-tech); font-weight: var(--weight-tech); font-size: var(--size-hero-tech); line-height: var(--leading-tech); letter-spacing: var(--tracking-tech); text-transform: uppercase; color: var(--corsa-red); margin: var(--space-4) 0 var(--space-3); }
 .consultation-subtitle { font-family: var(--font-mono); font-weight: var(--weight-mono); font-size: 13px; letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--champagne-gold); margin: 0 0 var(--space-6); }
 .consultation-intro { margin: 0; }
 
@@ -841,33 +851,63 @@ html, body {
 .consultation-cta {
   position: relative;
   overflow: hidden;
+  /* See .webgl-pill--primary's comment above: without isolation:isolate,
+     ::before's z-index:-1 escapes past this button (position:relative
+     alone doesn't create a stacking context) to whichever distant ancestor
+     does — here, .webgl-consultation-view at z-index:9 — painting the
+     gold disc behind the ENTIRE page instead of just behind this button's
+     own text. */
+  isolation: isolate;
   background: var(--action-danger-bg); color: var(--action-danger-fg);
   border: 1px solid var(--action-danger-bg);
   font-family: var(--font-mono); font-weight: var(--weight-mono); font-size: 13px;
   letter-spacing: var(--tracking-cta); text-transform: uppercase;
   padding: 18px 32px; border-radius: 2px; cursor: pointer;
-  transition: var(--transition-control);
+  /* color gets its own longhand (not --transition-control) so it can carry
+     a delay — see the ::before comment below for why 200ms, not something
+     closer to the disc's full 520ms. Defined here on the base rule, not
+     just the :hover one, so the SAME delay applies symmetrically on the
+     way out (mouse leaves, disc shrinks) as on the way in: text should
+     only flip once the fill has substantially crossed over, in either
+     direction. */
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard) 200ms;
 }
 /* Same expanding circular hover-fill as .webgl-pill--primary above (see its
    comment for why z-index:-1 alone keeps the label legible with no markup
-   change) — a darker-red disc grows from center on hover/focus. Sized
+   change), but sweeping to gold rather than a darker red — red-on-red was
+   too close in value to read as a deliberate animation at a glance. Sized
    larger than the pill's since this button runs much wider; overflow:hidden
-   above clips it to the button's own near-square corners either way. */
+   above clips it to the button's own near-square corners either way.
+   Text flips from white to --text-on-gold (black) 200ms into the disc's
+   520ms growth (see the base rule's transition above), not immediately:
+   white is what's actually readable against the red that still dominates
+   early in the sweep, and black only becomes readable once gold has taken
+   over most of the button — flipping immediately would pass through a
+   low-contrast black-on-red moment. --ease-standard, not the steeper
+   --ease-out-technical used elsewhere on this page: that curve is front-
+   loaded enough that the disc was already ~85% grown by 150ms, making the
+   color flip land far too late relative to how the disc actually looks;
+   ease-standard's more even pace keeps the 200ms delay roughly in sync
+   with the disc's real visual coverage instead of guessing against a
+   curve it isn't calibrated to. */
 .consultation-cta::before {
   content: '';
   position: absolute;
   top: 50%; left: 50%;
   width: 0; height: 0;
   border-radius: 50%;
-  background: var(--action-danger-bg-hover);
+  background: var(--champagne-gold);
   transform: translate(-50%, -50%);
-  transition: width var(--duration-slow) var(--ease-out-technical), height var(--duration-slow) var(--ease-out-technical);
+  transition: width var(--duration-slow) var(--ease-standard), height var(--duration-slow) var(--ease-standard);
   z-index: -1;
 }
 .consultation-cta:not(:disabled):hover::before,
 .consultation-cta:not(:disabled):focus-visible::before { width: 700px; height: 700px; }
 .consultation-cta:not(:disabled):hover,
-.consultation-cta:not(:disabled):focus-visible { border-color: var(--action-danger-bg-hover); }
+.consultation-cta:not(:disabled):focus-visible {
+  border-color: var(--champagne-gold);
+  color: var(--text-on-gold);
+}
 .consultation-cta:focus-visible { outline: 2px solid var(--corsa-red); outline-offset: 2px; }
 .consultation-cta:disabled { background: var(--action-disabled-bg); border-color: var(--action-disabled-bg); color: var(--action-disabled-fg); cursor: default; }
 .consultation-form-note { font-family: var(--font-mono); font-size: 11px; color: var(--paper-dim); margin: 0; }
