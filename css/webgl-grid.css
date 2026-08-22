@@ -123,6 +123,14 @@ html, body {
    mismatch the smaller mobile font/padding in the media query below. */
 [data-sound-label] { display: inline-block; width: 3ch; text-align: left; }
 
+/* Red border at rest, fills solid red on hover — a deliberate pivot away
+   from this button's earlier solid-gold treatment (still used everywhere
+   else as the site's one general-purpose accent; this is now the one
+   exception, not a reversion of that rule). background/color intentionally
+   NOT overridden here beyond border/text: leaving .webgl-pill's own
+   inherited glass background (rgba(21,23,26,0.62) + blur) is what makes
+   the rest state read as "neutral," distinguished only by the red
+   border/label, the same way Sound Off/the clock already look. */
 .webgl-pill--primary {
   position: relative;
   overflow: hidden;
@@ -136,34 +144,44 @@ html, body {
      at a screenshot — computed-style checks on width/height still read
      "correct" even while completely invisible. */
   isolation: isolate;
-  background: var(--champagne-gold);
-  border-color: var(--champagne-gold);
-  color: var(--vertex-black);
+  border-color: var(--corsa-red);
+  color: var(--corsa-red);
   font-weight: var(--weight-mono);
+  /* color carries a delay (not --transition-control) for the same reason
+     as .consultation-cta below: text needs to stay red while the red disc
+     has barely grown (red-on-neutral is readable), and only flip to white
+     once the disc has substantially covered the pill — an immediate flip
+     would pass through a low-contrast red-on-red moment mid-sweep. */
+  transition: border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard) 200ms;
 }
-/* Expanding circular hover-fill in place of a flat colour swap: a brass
-   disc grows from the pill's center on hover/focus rather than the whole
+/* Expanding circular hover-fill in place of a flat colour swap: a red disc
+   grows from the pill's center on hover/focus rather than the whole
    background instantly flipping. z-index:-1 (not a wrapping span around
    the label) is enough to keep the disc behind the button's own text: per
    CSS2.1's painting order, in-flow inline content — the plain text label
    here — already paints before a z-index:auto/negative positioned sibling,
    so no markup change is needed for the label to stay legible throughout.
-   overflow:hidden above clips the disc to the pill's own rounded shape. */
+   overflow:hidden above clips the disc to the pill's own rounded shape.
+   --ease-standard, not --ease-out-technical: that curve is front-loaded
+   enough that a disc following it is already ~85% grown at 150ms, which
+   throws off the color-transition delay's timing (see .consultation-cta's
+   own note on this) — ease-standard's more even pace keeps the 200ms delay
+   roughly in sync with the disc's actual visual coverage. */
 .webgl-pill--primary::before {
   content: '';
   position: absolute;
   top: 50%; left: 50%;
   width: 0; height: 0;
   border-radius: 50%;
-  background: var(--aged-brass);
+  background: var(--corsa-red);
   transform: translate(-50%, -50%);
-  transition: width var(--duration-slow) var(--ease-out-technical), height var(--duration-slow) var(--ease-out-technical);
+  transition: width var(--duration-slow) var(--ease-standard), height var(--duration-slow) var(--ease-standard);
   z-index: -1;
 }
 .webgl-pill--primary:hover::before,
 .webgl-pill--primary:focus-visible::before { width: 260px; height: 260px; }
 .webgl-pill--primary:hover,
-.webgl-pill--primary:focus-visible { border-color: var(--aged-brass); }
+.webgl-pill--primary:focus-visible { color: var(--paper-white); }
 
 /* Descendant selector (not bare .webgl-readout) so pointer-events:none here
    reliably beats .webgl-chrome-cluster > *'s pointer-events:auto above,
@@ -319,8 +337,21 @@ html, body {
 .webgl-list-row:hover .webgl-list-arrow { color: var(--champagne-gold); transform: translateX(3px); }
 
 @media (max-width: 700px) {
-  .webgl-list-view { padding: 150px var(--space-4) 140px; }
+  /* 190px, not 150px — see .phi-scroll's own <700px override for the
+     measurement behind this: a wrapped 3-row mobile chrome actually
+     bottoms out around y=180px, so 150px never cleared it here either.
+     100px bottom, not 140px — combined with the tighter row padding
+     below, 12 rows' worth of list plus both top/bottom clearances came to
+     ~970px against an 844px-tall phone (measured directly); the two
+     changes together claw back the ~126px difference so neither the
+     heading (scrolled to the end) nor the last row (at rest) sits under
+     the fixed chrome/toggle above and below it. */
+  .webgl-list-view { padding: 190px var(--space-4) 100px; }
   .webgl-list-brand { font-size: 13px; }
+  /* 12px vertical, not 16px: still a 44px-tall tap target (12+12 padding +
+     ~20px line height) — the minimum this project's touch-target audit
+     calls for, not below it. */
+  .webgl-list-row { padding: 12px 6px; }
 }
 
 /* Our Philosophy: a full editorial page, not a quick-glance data browser like
@@ -373,7 +404,12 @@ html, body {
   display: grid; grid-template-columns: 1.3fr 0.9fr; gap: var(--space-8);
   align-items: center;
 }
-.phi-headline { font-family: var(--font-luxury); font-weight: var(--weight-luxury); font-size: clamp(28px, 4vw, 44px); line-height: 1.15; color: var(--paper-white); margin: var(--space-3) 0 var(--space-5); }
+/* Same high-tech Orbitron/weight-tech/tracking-tech recipe as
+   .consultation-title — --size-display-tech (not --size-hero-tech), sized
+   for this 2-column hero split rather than a full-width single hero.
+   Color stays --paper-white on purpose: only the font was asked for here,
+   not the gold/red treatment the other two tech headlines carry. */
+.phi-headline { font-family: var(--font-tech); font-weight: var(--weight-tech); font-size: var(--size-display-tech); line-height: var(--leading-tech); letter-spacing: var(--tracking-tech); text-transform: uppercase; color: var(--paper-white); margin: var(--space-3) 0 var(--space-5); }
 .phi-lead { font-family: var(--font-luxury); font-size: 19px; line-height: 1.5; color: var(--paper-white); max-width: var(--measure-text); margin-bottom: var(--space-4); }
 .phi-hero-text .phi-body { margin-bottom: var(--space-6); }
 
@@ -457,50 +493,100 @@ html, body {
 .phi-reveal-media { max-width: 300px; }
 .phi-reveal-text { display: flex; flex-direction: column; gap: var(--space-3); }
 
-.phi-partner-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--space-4); margin-bottom: var(--space-4); }
-.phi-partner-slot { aspect-ratio: 16 / 10; border: 1px dashed var(--line-structural); border-radius: 2px; background: rgba(46,59,71,0.08); position: relative; }
-.phi-partner-slot::before, .phi-partner-slot::after {
-  content: ''; position: absolute; width: 10px; height: 10px; border: 1px solid var(--line-structural);
-}
-.phi-partner-slot::before { top: 6px; left: 6px; border-right: 0; border-bottom: 0; }
-.phi-partner-slot::after { bottom: 6px; right: 6px; border-left: 0; border-top: 0; }
-.phi-note { font-family: var(--font-mono); font-size: 11px; color: var(--paper-dim); font-style: italic; }
-
 .phi-workshop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); margin-top: var(--space-6); }
 .phi-workshop-grid img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border: 1px solid var(--line-faint); border-radius: 2px; }
 
-/* Full-width band, not capped at the same 1100px as the sections above it —
-   a footer reads as the page's edge, not another content column. Uses
-   var(--vertex-black) rather than the requested #0A0A0C literal: they're a
-   hair apart and the brief also said "tailored strictly to Vertex design
-   system tokens," which the existing token satisfies without introducing a
-   near-duplicate off-palette value. */
-.phi-site-footer {
+/* ==========================================================================
+   Global footer — rebuilt to match a supplied reference screenshot exactly
+   in structure (brand+newsletter / Quick Links / Contact Us / Follow Us,
+   a divider, then a copyright+legal bottom bar), reusing only Vertex's own
+   fonts/colors/spacing tokens for the actual values. Two deliberate content
+   departures from the reference, both content-honesty calls rather than
+   layout ones: no light/dark theme toggle (this brand has exactly one,
+   permanently-dark theme site-wide — a toggle that switches nothing would
+   be a fake control, worse than the screenshot's structural slot going
+   unused), and two social icons instead of four (Instagram + X/Twitter are
+   this brand's only real channels; padding out to match the reference's
+   platform count would be inventing a presence Vertex doesn't have).
+   Full-width, not capped at the 1100px/900px content columns above it — a
+   footer reads as the page's edge, not another content column. Uses
+   var(--vertex-black) rather than a literal hex: the brief also said
+   "tailored strictly to Vertex design system tokens," which this token
+   already satisfies without a near-duplicate off-palette value. */
+.vx-footer {
   width: 100%;
   background: var(--vertex-black);
   border-top: 1px solid var(--line-faint);
-  padding-top: 40px;
+  padding-top: 48px;
+}
+.vx-footer-top {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  gap: var(--space-6);
-  font-family: var(--font-mono);
+  gap: var(--space-8);
 }
-.phi-footer-col { display: flex; flex-direction: column; gap: 14px; min-width: 180px; }
-.phi-footer-logo { display: flex; align-items: center; gap: 10px; }
-.phi-footer-logo img { width: 20px; height: 20px; }
-.phi-footer-logo span { font-family: var(--font-luxury); font-size: 15px; letter-spacing: var(--tracking-wordmark); color: var(--paper-white); }
-.phi-footer-copyright { font-size: 11px; letter-spacing: 0.02em; color: var(--paper-dim); }
-.phi-footer-links { align-items: flex-start; }
-.phi-footer-links a,
-.phi-footer-contact a {
-  font-size: 11px; letter-spacing: var(--tracking-label); text-transform: uppercase;
-  color: var(--paper-muted); transition: var(--transition-control);
+.vx-footer-brand { display: flex; flex-direction: column; gap: 12px; flex: 1.4; min-width: 260px; max-width: 340px; }
+.vx-footer-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.vx-footer-logo img { width: 20px; height: 20px; }
+.vx-footer-logo span { font-family: var(--font-luxury); font-size: 15px; letter-spacing: var(--tracking-wordmark); color: var(--paper-white); }
+.vx-footer-headline { font-family: var(--font-luxury); font-weight: var(--weight-luxury); font-size: 26px; color: var(--paper-white); margin: 0; }
+.vx-footer-sub { font-family: var(--font-body); font-size: 14px; line-height: 1.5; color: var(--paper-dim); margin: 0; }
+
+.vx-footer-newsletter { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+.vx-footer-newsletter input {
+  flex: 1; min-width: 0;
+  background: var(--graphite); border: 1px solid var(--line-faint); border-radius: 999px;
+  padding: 12px 18px; color: var(--paper-white); font-family: var(--font-body); font-size: 13px;
+  transition: var(--transition-control);
 }
-.phi-footer-links a:hover,
-.phi-footer-contact a:hover { color: var(--champagne-gold); }
-.phi-footer-socials { display: flex; gap: var(--space-4); }
-.phi-footer-contact .phi-footer-email { color: var(--champagne-gold); }
+.vx-footer-newsletter input::placeholder { color: var(--paper-dim); }
+.vx-footer-newsletter input:focus-visible { outline: none; border-color: var(--champagne-gold); }
+.vx-footer-newsletter button {
+  flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%;
+  background: var(--paper-white); color: var(--vertex-black); border: 0; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: var(--transition-control);
+}
+.vx-footer-newsletter button:hover { background: var(--champagne-gold); }
+.vx-footer-newsletter button:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.vx-footer-newsletter button svg, .vx-footer-newsletter button i { width: 16px; height: 16px; }
+
+.vx-footer-col { display: flex; flex-direction: column; gap: 14px; min-width: 150px; }
+.vx-footer-col-title { font-family: var(--font-body); font-weight: var(--weight-body-semi); font-size: 16px; color: var(--paper-white); margin: 0; }
+.vx-footer-col a {
+  font-family: var(--font-body); font-size: 14px;
+  color: var(--champagne-gold); transition: var(--transition-control);
+}
+.vx-footer-col a:hover { color: var(--paper-white); }
+.vx-footer-col p { font-family: var(--font-body); font-size: 14px; line-height: 1.5; color: var(--paper-muted); margin: 0; }
+.vx-footer-email { color: var(--champagne-gold); }
+.vx-footer-email:hover { color: var(--paper-white); }
+
+.vx-footer-socials { display: flex; gap: 10px; }
+.vx-footer-socials a {
+  width: 38px; height: 38px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--graphite); border: 1px solid var(--line-faint); color: var(--paper-muted);
+  transition: var(--transition-control);
+}
+.vx-footer-socials a:hover { color: var(--champagne-gold); border-color: var(--champagne-gold); }
+.vx-footer-socials svg, .vx-footer-socials i { width: 16px; height: 16px; }
+
+/* Box/background/border colors shared with .booking-demo-disclaimer live
+   further below (with the rest of the booking-flow styles); this one rule
+   stays here, ahead of this file's <700px footer-compaction block, so that
+   block's own margin/padding overrides actually win at mobile widths —
+   same base-before-override source order every other footer property in
+   this section already follows. */
+.vx-footer-disclaimer { margin: 40px 0 0; max-width: 640px; }
+
+.vx-footer-divider { width: 100%; height: 1px; background: var(--line-faint); margin: 24px 0 24px; }
+
+.vx-footer-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--space-4); padding-bottom: 40px; }
+.vx-footer-copyright { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.02em; color: var(--paper-dim); }
+.vx-footer-legal { display: flex; gap: var(--space-5); }
+.vx-footer-legal a { font-family: var(--font-mono); font-size: 11px; letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--paper-muted); transition: var(--transition-control); }
+.vx-footer-legal a:hover { color: var(--champagne-gold); }
 
 @media (max-width: 900px) {
   .phi-hero { grid-template-columns: 1fr; }
@@ -508,9 +594,53 @@ html, body {
   .phi-video-grid { grid-template-columns: repeat(2, 1fr); }
   .phi-reveal { grid-template-columns: 1fr; }
   .phi-reveal-media { max-width: 260px; margin: 0 auto; }
-  .phi-partner-row { grid-template-columns: repeat(2, 1fr); }
   .phi-workshop-grid { grid-template-columns: 1fr; }
-  .phi-site-footer { flex-direction: column; gap: var(--space-5); }
+  .vx-footer-brand { max-width: none; }
+  .vx-footer-bottom { flex-direction: column; align-items: flex-start; }
+}
+/* .phi-scroll never had a <700px override at all (unlike .detail-scroll,
+   .consultation-scroll and .webgl-list-view, which all already bump their
+   top clearance here) — its fixed 130px top padding was never quite enough
+   once .webgl-chrome wraps into three stacked rows on a narrow phone
+   (measured directly: a 390px-wide chrome-top actually renders ~164px
+   tall once wrapped, bottoming out around y=180 — 150px, the value the
+   other three panels already used, was already short too; corrected to
+   190px everywhere below rather than leaving three panels on the old
+   number). Bottom padding is a DIFFERENT, unrelated problem: at exactly
+   max scroll, a taller bottom padding makes the fixed chrome cover MORE
+   of whatever sits above it, not less (it's math, not a typo — padding
+   after the last section can only push scrollHeight up, which pushes the
+   viewport's own top-of-view boundary further down the page, past more
+   of that section) — so it stays at the original 80px. The actual reason
+   Our Philosophy's new footer used to sit under the chrome at max scroll
+   is that the footer itself rendered ~844px tall on a 390-wide phone,
+   i.e. an entire viewport by itself — no padding value fixes a section
+   that's already taller than the space available beneath a fixed header.
+   The real fix is the compaction 20px below (2-up nav columns, tighter
+   gaps): once the footer is short enough to fit under the chrome AND
+   above one viewport-height, padding stops being the relevant lever. */
+@media (max-width: 700px) {
+  /* 24px, not 80px: the footer already carries its own bottom padding
+     (.vx-footer-bottom's padding-bottom below) — stacking .phi-scroll's
+     full 80px on top of that was most of what pushed the footer's own
+     rendered height past the budget one phone viewport allows beneath the
+     fixed chrome at max scroll (see the compaction rules and their
+     comment just below for the rest of that budget). */
+  .phi-scroll { padding: 190px var(--space-4) 0; }
+  /* The actual fix for the footer sitting under the chrome at max scroll:
+     Quick Links / Contact Us / Follow Us go 2-up instead of each getting
+     its own full-width row, and gaps tighten — cuts the footer from ~844px
+     (an entire 390-wide phone viewport by itself) down to something that
+     actually fits beneath one screen's worth of scroll. */
+  .vx-footer-top { gap: 14px; }
+  .vx-footer-brand { flex-basis: 100%; gap: 8px; }
+  .vx-footer-col { flex: 1 1 42%; gap: 8px; }
+  .vx-footer-divider { margin: 8px 0; }
+  .vx-footer-bottom { padding-bottom: 8px; }
+  /* The demo disclaimer box (added after the budget above was tuned) blew
+     right through it again — same fix in miniature: no top margin, tighter
+     padding, smaller/tighter text, same box. */
+  .vx-footer-disclaimer { margin-top: 0; padding: 8px 10px; font-size: 11px; line-height: 1.4; }
 }
 
 /* ==========================================================================
@@ -585,7 +715,7 @@ html, body {
 }
 /* Every section caps at the same 1100px column as Our Philosophy, except the
    feature banner — that one deliberately omits max-width so it reads as a
-   full-bleed break from the column, same technique .phi-site-footer already
+   full-bleed break from the column, same technique .vx-footer already
    uses one section back. */
 .detail-hero, .detail-overview, .detail-gallery { width: 100%; max-width: 1100px; }
 .detail-feature { width: 100%; }
@@ -662,8 +792,21 @@ html, body {
   .detail-feature { aspect-ratio: 4 / 3; }
 }
 @media (max-width: 700px) {
-  .detail-back { top: 150px; }
-  .detail-scroll { padding: 150px var(--space-4) 80px; }
+  /* 190px, not 150px — see .phi-scroll's own <700px override (added
+     alongside this same footer rebuild) for the measurement behind this:
+     a wrapped 3-row mobile chrome actually bottoms out around y=180px, so
+     150px never cleared it here either. No footer on this page, so the
+     bottom value is untouched — this is purely a top-clearance fix. */
+  .detail-back { top: 190px; }
+  /* 250px, not 190px, for the content: .detail-back itself sits at 190px
+     and is 34px tall at this width (.webgl-pill's own <700px override), so
+     content starting at that same 190px — matching the button's OWN top,
+     not clearing it — put the hero title directly under the button rather
+     than below it. This works at desktop only because there's enough
+     horizontal room for the button and the hero text to sit side by side;
+     once everything's full-width on mobile, they need vertical separation
+     instead: 190 + 34 (button height) + 26 (breathing room) = 250. */
+  .detail-scroll { padding: 250px var(--space-4) 80px; }
 }
 
 /* ==========================================================================
@@ -724,7 +867,7 @@ html, body {
   transform: translateZ(0);
   will-change: transform;
 }
-.consultation-hero, .consultation-experience, .consultation-terms, .consultation-form-section {
+.consultation-hero, .booking-flow, .consultation-vip {
   width: 100%;
   max-width: 900px;
 }
@@ -777,52 +920,16 @@ html, body {
 .consultation-card-title { font-family: var(--font-luxury); font-weight: var(--weight-luxury); font-size: 22px; color: var(--paper-white); margin: 0; }
 .consultation-card-body { font-family: var(--font-body); font-size: 14px; line-height: 1.6; color: var(--paper-muted); margin: 0; }
 
-/* Sleek glass layer — same frosted-glass recipe as .webgl-pill (the site's
-   one established "glass" texture), applied here to a full content block
-   rather than a small floating control, per the brief's "dark glass layers"
-   ask. Left border in red: the one place besides the CTA this page uses it,
-   flagging "this paragraph is about money" at a glance. */
-.consultation-quote {
-  margin: 0 0 var(--space-5);
-  padding: var(--space-8);
-  background: rgba(21,23,26,0.62);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(237,232,221,0.14);
-  border-left: 3px solid var(--corsa-red);
-  border-radius: 2px;
-  opacity: 0; transform: translate3d(0, 24px, 0);
-  transition: opacity 0.7s var(--ease-standard), transform 0.7s var(--ease-standard);
-  will-change: opacity, transform;
-}
-.consultation-quote.is-revealed { opacity: 1; transform: translate3d(0, 0, 0); }
-.consultation-quote-amount { font-family: var(--font-mono); font-weight: var(--weight-numeric); font-size: clamp(28px, 4vw, 40px); color: var(--paper-white); margin: 0 0 var(--space-2); }
-/* .phi-stat-value (the count-up target, see panelReveal.js's
-   animateStatCounter) is a sibling of the currency label below, so the
-   label keeps its own class instead of a bare "span" selector — a generic
-   descendant selector would otherwise also catch the number and shrink it
-   to 14px mid-count. */
-.consultation-quote-currency { font-size: 14px; color: var(--paper-dim); letter-spacing: var(--tracking-label); margin-left: 6px; }
-.consultation-quote-body { font-family: var(--font-body); font-size: 15px; line-height: 1.6; color: var(--paper-muted); margin: 0; max-width: var(--measure-text); }
-
-.consultation-notice {
-  font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.03em; line-height: 1.6;
-  color: var(--paper-white); background: var(--red-wash); border: 1px solid var(--line-alert);
-  border-radius: 2px; padding: var(--space-4) var(--space-5); margin: 0;
-  opacity: 0; transform: translate3d(0, 24px, 0);
-  transition: opacity 0.7s var(--ease-standard), transform 0.7s var(--ease-standard);
-  will-change: opacity, transform;
-}
-.consultation-notice.is-revealed { opacity: 1; transform: translate3d(0, 0, 0); }
-
-.consultation-form { display: flex; flex-direction: column; gap: var(--space-5); }
-.consultation-field {
-  display: flex; flex-direction: column; gap: 8px;
-  opacity: 0; transform: translate3d(0, 20px, 0);
-  transition: opacity 0.6s var(--ease-standard), transform 0.6s var(--ease-standard);
-  will-change: opacity, transform;
-}
-.consultation-field.is-revealed { opacity: 1; transform: translate3d(0, 0, 0); }
+/* Plain, always-visible fields — NOT scroll-revealed. Reused here by the
+   booking flow's Step 2 (fleet model select) and Step 3 (contact form),
+   both rendered fresh into [data-booking-step-body] on every step change
+   (src/consultationView.js) rather than scrolled past — there's no scroll
+   position for an IntersectionObserver to key a reveal off, and nothing
+   ever adds .is-revealed to these anymore, so the old opacity:0 resting
+   state this class used to have (back when it lived in one long
+   scroll-revealed form) would have left every field permanently invisible
+   here. */
+.consultation-field { display: flex; flex-direction: column; gap: 8px; }
 .consultation-field label { font-family: var(--font-mono); font-size: 11px; letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--paper-dim); }
 .consultation-field input, .consultation-field select, .consultation-field textarea {
   background: var(--graphite); border: 1px solid var(--line-faint); border-radius: 2px;
@@ -841,13 +948,11 @@ html, body {
   box-shadow: 0 0 0 3px var(--red-wash);
 }
 
-.consultation-cta-row {
-  display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3);
-  opacity: 0; transform: translate3d(0, 20px, 0);
-  transition: opacity 0.6s var(--ease-standard), transform 0.6s var(--ease-standard);
-  will-change: opacity, transform;
-}
-.consultation-cta-row.is-revealed { opacity: 1; transform: translate3d(0, 0, 0); }
+/* Red border at rest, fills solid red on hover — a deliberate pivot away
+   from this button's earlier solid-red-at-rest / gold-hover-fill
+   treatment. background:transparent (not the old solid --action-danger-bg)
+   is what makes the rest state read as an outline rather than a filled
+   button; border/text carry the same red the fill sweeps to on hover. */
 .consultation-cta {
   position: relative;
   overflow: hidden;
@@ -855,11 +960,11 @@ html, body {
      ::before's z-index:-1 escapes past this button (position:relative
      alone doesn't create a stacking context) to whichever distant ancestor
      does — here, .webgl-consultation-view at z-index:9 — painting the
-     gold disc behind the ENTIRE page instead of just behind this button's
-     own text. */
+     disc behind the ENTIRE page instead of just behind this button's own
+     text. */
   isolation: isolate;
-  background: var(--action-danger-bg); color: var(--action-danger-fg);
-  border: 1px solid var(--action-danger-bg);
+  background: transparent; color: var(--corsa-red);
+  border: 1px solid var(--corsa-red);
   font-family: var(--font-mono); font-weight: var(--weight-mono); font-size: 13px;
   letter-spacing: var(--tracking-cta); text-transform: uppercase;
   padding: 18px 32px; border-radius: 2px; cursor: pointer;
@@ -874,50 +979,284 @@ html, body {
 }
 /* Same expanding circular hover-fill as .webgl-pill--primary above (see its
    comment for why z-index:-1 alone keeps the label legible with no markup
-   change), but sweeping to gold rather than a darker red — red-on-red was
-   too close in value to read as a deliberate animation at a glance. Sized
-   larger than the pill's since this button runs much wider; overflow:hidden
-   above clips it to the button's own near-square corners either way.
-   Text flips from white to --text-on-gold (black) 200ms into the disc's
-   520ms growth (see the base rule's transition above), not immediately:
-   white is what's actually readable against the red that still dominates
-   early in the sweep, and black only becomes readable once gold has taken
-   over most of the button — flipping immediately would pass through a
-   low-contrast black-on-red moment. --ease-standard, not the steeper
-   --ease-out-technical used elsewhere on this page: that curve is front-
-   loaded enough that the disc was already ~85% grown by 150ms, making the
-   color flip land far too late relative to how the disc actually looks;
-   ease-standard's more even pace keeps the 200ms delay roughly in sync
-   with the disc's real visual coverage instead of guessing against a
-   curve it isn't calibrated to. */
+   change) — a red disc grows from center, filling the button completely.
+   Sized larger than the pill's since this button runs much wider;
+   overflow:hidden above clips it to the button's own near-square corners
+   either way. Text flips from red to --action-danger-fg (white) 200ms into
+   the disc's 520ms growth (see the base rule's transition above), not
+   immediately: red-on-transparent is what's readable early in the sweep
+   (barely any fill yet), and white only becomes the right choice once red
+   has taken over most of the button — flipping immediately would pass
+   through a low-contrast red-on-red moment. --ease-standard, not the
+   steeper --ease-out-technical used elsewhere on this page: that curve is
+   front-loaded enough that the disc is already ~85% grown by 150ms, which
+   throws off a delay calibrated against the full 520ms; ease-standard's
+   more even pace keeps the 200ms delay roughly in sync with the disc's
+   real visual coverage instead of guessing against a curve it isn't
+   calibrated to. */
 .consultation-cta::before {
   content: '';
   position: absolute;
   top: 50%; left: 50%;
   width: 0; height: 0;
   border-radius: 50%;
-  background: var(--champagne-gold);
+  background: var(--corsa-red);
   transform: translate(-50%, -50%);
   transition: width var(--duration-slow) var(--ease-standard), height var(--duration-slow) var(--ease-standard);
   z-index: -1;
 }
 .consultation-cta:not(:disabled):hover::before,
 .consultation-cta:not(:disabled):focus-visible::before { width: 700px; height: 700px; }
+/* No border-color override needed here — it's --corsa-red in both states
+   now, unlike the old gold-hover treatment which had to switch it. */
 .consultation-cta:not(:disabled):hover,
 .consultation-cta:not(:disabled):focus-visible {
-  border-color: var(--champagne-gold);
-  color: var(--text-on-gold);
+  color: var(--action-danger-fg);
 }
 .consultation-cta:focus-visible { outline: 2px solid var(--corsa-red); outline-offset: 2px; }
 .consultation-cta:disabled { background: var(--action-disabled-bg); border-color: var(--action-disabled-bg); color: var(--action-disabled-fg); cursor: default; }
-.consultation-form-note { font-family: var(--font-mono); font-size: 11px; color: var(--paper-dim); margin: 0; }
+
+/* ==========================================================================
+   Booking flow — Step 1 (2-column calendar + time-block picker, laid out
+   against a supplied reference screenshot), Step 2 (path summary + fleet
+   model select), Step 3 (contact form + dynamic red CTA). Content inside
+   [data-booking-step-body] is rendered per step by src/consultationView.js,
+   not static — see that file's header comment for why a full re-render per
+   step is simpler and more robust here than incrementally patching the
+   calendar/slot DOM by hand. */
+.booking-steps { display: flex; align-items: center; justify-content: center; gap: var(--space-3); margin-bottom: var(--space-8); }
+.booking-step-dot {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--paper-dim);
+}
+.booking-step-num {
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 1px solid var(--line-faint); color: var(--paper-dim);
+  font-size: 13px; font-weight: var(--weight-mono);
+  transition: var(--transition-control);
+}
+.booking-step-dot.is-active .booking-step-num { border-color: var(--corsa-red); color: var(--corsa-red); }
+.booking-step-dot.is-active { color: var(--paper-white); }
+.booking-step-dot.is-complete .booking-step-num { background: var(--corsa-red); border-color: var(--corsa-red); color: var(--action-danger-fg); }
+.booking-step-line { width: 48px; height: 1px; background: var(--line-faint); flex-shrink: 0; }
+
+/* --- Step 1: calendar + times, side by side per the reference screenshot --- */
+.booking-step1 { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: var(--space-6); align-items: start; }
+.booking-location-field { grid-column: 1 / -1; max-width: 320px; }
+.booking-calendar { background: var(--graphite); border: 1px solid var(--line-faint); border-radius: 2px; padding: var(--space-6); }
+.booking-cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-5); }
+.booking-cal-month { font-family: var(--font-mono); font-weight: var(--weight-mono); font-size: 13px; letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--paper-white); }
+.booking-cal-nav {
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line-faint);
+  background: none; color: var(--paper-muted); cursor: pointer; transition: var(--transition-control);
+}
+.booking-cal-nav:hover { border-color: var(--corsa-red); color: var(--corsa-red); }
+.booking-cal-nav svg { width: 14px; height: 14px; }
+/* 44px, not 28px, on touch devices — same minimum as every other tap
+   target in the booking flow (calendar day cells, time slots); 28px only
+   stays this small for mouse pointers, where hover/click precision doesn't
+   need the same margin. */
+@media (hover: none), (pointer: coarse) {
+  .booking-cal-nav { width: 44px; height: 44px; }
+  .booking-cal-nav svg { width: 16px; height: 16px; }
+}
+.booking-cal-weekdays, .booking-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+.booking-cal-weekdays { margin-bottom: var(--space-2); }
+.booking-cal-weekdays span { text-align: center; font-family: var(--font-mono); font-size: 10px; letter-spacing: var(--tracking-label); color: var(--paper-dim); padding-bottom: 6px; }
+.booking-cal-grid { row-gap: 4px; }
+.booking-cal-day {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  background: none; border: 0; border-radius: 50%;
+  font-family: var(--font-mono); font-size: 13px; color: var(--paper-muted);
+  cursor: pointer; transition: var(--transition-control);
+}
+.booking-cal-day.is-outside { color: var(--action-disabled-fg); }
+.booking-cal-day:disabled { color: var(--action-disabled-fg); cursor: default; }
+.booking-cal-day:not(:disabled):hover { background: var(--red-wash); color: var(--paper-white); }
+.booking-cal-day.is-today { border: 1px solid var(--line-structural); }
+.booking-cal-day.is-selected { background: var(--corsa-red); color: var(--action-danger-fg); font-weight: var(--weight-mono); }
+
+.booking-times { display: flex; flex-direction: column; gap: var(--space-2); }
+.booking-times-title { font-family: var(--font-mono); font-weight: var(--weight-mono); font-size: 13px; letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--paper-white); margin: 0 0 var(--space-3); }
+.booking-times-empty { font-family: var(--font-body); font-size: 14px; color: var(--paper-dim); margin: 0; }
+.booking-slot-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: var(--space-5); }
+.booking-slot-group-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--paper-dim); margin: 0; }
+.booking-slot {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
+  width: 100%; padding: 14px 18px; border-radius: 999px;
+  background: var(--graphite); border: 1px solid var(--line-faint);
+  font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.02em; color: var(--paper-white);
+  text-align: left; cursor: pointer; transition: var(--transition-control);
+}
+.booking-slot:not(:disabled):hover { border-color: var(--corsa-red); }
+.booking-slot.is-selected { background: var(--red-wash); border-color: var(--corsa-red); color: var(--paper-white); }
+.booking-slot:disabled, .booking-slot.is-booked {
+  background: rgba(21,23,26,0.4); border-color: var(--line-faint); color: var(--action-disabled-fg); cursor: default;
+}
+.booking-slot-tag { font-size: 10px; letter-spacing: var(--tracking-label); color: var(--signal-rare); flex-shrink: 0; }
+.booking-slot.is-booked .booking-slot-tag { color: var(--action-disabled-fg); }
+.booking-slot--bespoke { border-radius: 2px; }
+.booking-slot--full {
+  width: 100%; padding: var(--space-5); border-radius: 2px;
+  background: var(--red-wash); border: 1px solid var(--line-alert);
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--paper-white);
+  text-align: center; cursor: default;
+}
+
+/* --- Step 2: path summary + (Fleet only) model select --- */
+.booking-summary-card {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap;
+  padding: var(--space-5) var(--space-6); margin-bottom: var(--space-6);
+  background: var(--graphite); border: 1px solid var(--line-faint); border-left: 3px solid var(--corsa-red); border-radius: 2px;
+}
+.booking-summary-option { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.02em; color: var(--paper-white); }
+.booking-summary-fee { font-family: var(--font-mono); font-weight: var(--weight-numeric); font-size: 20px; color: var(--corsa-red); }
+.booking-step2-note { font-family: var(--font-body); font-size: 14px; line-height: 1.6; color: var(--paper-muted); margin: 0 0 var(--space-6); }
+.booking-step2 .consultation-field { margin-bottom: var(--space-6); }
+
+/* --- Shared step actions row (Back / Continue-or-Submit) --- */
+.booking-step-actions { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); margin-top: var(--space-2); }
+.booking-step-actions .webgl-pill svg { width: 14px; height: 14px; }
+.booking-step3 { display: flex; flex-direction: column; gap: var(--space-5); }
+.booking-demo-disclaimer, .vx-footer-disclaimer {
+  margin: 0; padding: var(--space-4) var(--space-5); background: var(--gold-wash);
+  border: 1px solid var(--line-accent); border-radius: 2px;
+  font-family: var(--font-body); font-size: 13px; line-height: 1.6; color: var(--paper-white);
+}
+.booking-demo-disclaimer strong, .vx-footer-disclaimer strong {
+  color: var(--champagne-gold); text-transform: uppercase; letter-spacing: 0.04em;
+}
 
 @media (max-width: 900px) {
+  .booking-step1 { grid-template-columns: 1fr; }
   .consultation-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 700px) {
-  .consultation-back { top: 150px; }
-  .consultation-scroll { padding: 150px var(--space-4) 80px; }
+  /* 190px, not 150px — see .phi-scroll's own <700px override for the
+     measurement behind this: a wrapped 3-row mobile chrome actually
+     bottoms out around y=180px, so 150px never cleared it here either. */
+  .consultation-back { top: 190px; }
+  /* 250px top, not 190px: same fix as .detail-scroll's identical override
+     (190 + the button's own 34px height + 26px breathing room) — 190px
+     alone matches the button's OWN top rather than clearing it, which
+     puts the hero eyebrow directly under the button instead of below it.
+     24px bottom, not 80px — same reasoning as .phi-scroll's own <700px
+     override: the footer already carries its own bottom padding, and the
+     shared .vx-footer-* compaction rules (defined once, applying to both
+     pages' copies of the same footer) are what actually get it to fit
+     beneath one phone viewport's worth of scroll. */
+  .consultation-scroll { padding: 250px var(--space-4) 24px; }
+}
+
+/* ==========================================================================
+   Legal pages — Privacy Policy / Terms of Service / Cookie Settings, one
+   shared shell for all three (src/legalView.js swaps content per page, same
+   "one template" approach as the car detail page's 12 cars). Reachable only
+   from a footer link on Our Philosophy or Consultation, so — like
+   Consultation itself — it sits ABOVE everything reachable from, including
+   Consultation: z-index 9, tied with .webgl-consultation-view rather than
+   above it numerically (there's no integer between 9 and chrome's 10) —
+   resolved instead by DOM order (see index.html's placement comment),
+   which CSS guarantees for equal z-index ties. */
+.webgl-legal-view {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  background: var(--vertex-black);
+  opacity: 0;
+  transform: translate3d(0, 10px, 0);
+  pointer-events: none;
+  transition: opacity var(--duration-base) var(--ease-standard), transform var(--duration-base) var(--ease-standard);
+  will-change: opacity, transform;
+}
+.webgl-stage.is-legal-view .webgl-legal-view {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  pointer-events: auto;
+}
+.legal-back {
+  position: absolute;
+  top: 110px;
+  left: var(--space-6);
+  z-index: 2;
+}
+.legal-back svg { width: 14px; height: 14px; }
+
+/* Consultation/Detail/Legal back pills all fade out once their panel's own
+   scroll container has moved more than a few px, and back in near the top
+   — see bindBackButtonScrollFade (src/panelReveal.js) for why: each pill
+   is fixed at one screen position regardless of scroll depth, so without
+   this it stays parked on top of whatever content passes underneath it,
+   worst case the footer's own newsletter input. */
+.consultation-back, .detail-back, .legal-back { transition: opacity var(--duration-fast) var(--ease-standard); }
+.consultation-back.is-scrolled-past, .detail-back.is-scrolled-past, .legal-back.is-scrolled-past { opacity: 0; pointer-events: none; }
+/* Same reasoning as .detail-back/.consultation-back's own matching rule:
+   .webgl-pill's pointer-events:auto would otherwise leave this button
+   clickable at its fixed screen position even while its own panel is
+   hidden, since opacity:0 doesn't affect hit-testing. */
+.webgl-stage:not(.is-legal-view) .legal-back { pointer-events: none; }
+
+.legal-scroll {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding: 110px var(--space-6) 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-8);
+  transform: translateZ(0);
+  will-change: transform;
+}
+.legal-hero, .legal-body { width: 100%; max-width: 800px; }
+.legal-title { font-family: var(--font-luxury); font-weight: var(--weight-luxury); font-size: clamp(32px, 5vw, 52px); line-height: 1.1; color: var(--paper-white); margin: var(--space-3) 0 var(--space-2); }
+.legal-meta { font-family: var(--font-mono); font-size: 11px; letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--paper-dim); }
+.legal-demo-disclaimer { margin-top: var(--space-5); max-width: 640px; }
+
+/* Same phi-fade-up staggered entrance as Our Philosophy's and Consultation's
+   own heroes, and the same remove/reflow/re-add restart trick (see
+   replayHeroEntrance in src/legalView.js) — reused, not reinvented. A
+   4-element hero (eyebrow, title, meta, demo disclaimer) now that the
+   disclaimer's part of it, one step later than the other three. */
+.legal-hero.legal-animate-in > *:nth-child(1) { animation: phi-fade-up 0.9s var(--ease-standard) 0s both; will-change: opacity, transform; }
+.legal-hero.legal-animate-in > *:nth-child(2) { animation: phi-fade-up 0.9s var(--ease-standard) 0.15s both; will-change: opacity, transform; }
+.legal-hero.legal-animate-in > *:nth-child(3) { animation: phi-fade-up 0.9s var(--ease-standard) 0.3s both; will-change: opacity, transform; }
+.legal-hero.legal-animate-in > *:nth-child(4) { animation: phi-fade-up 0.9s var(--ease-standard) 0.45s both; will-change: opacity, transform; }
+
+.legal-body { display: flex; flex-direction: column; gap: var(--space-6); }
+.legal-section {
+  opacity: 0; transform: translate3d(0, 20px, 0);
+  transition: opacity 0.6s var(--ease-standard), transform 0.6s var(--ease-standard);
+  will-change: opacity, transform;
+}
+.legal-section.is-revealed { opacity: 1; transform: translate3d(0, 0, 0); }
+.legal-section-title { font-family: var(--font-body); font-weight: var(--weight-body-semi); font-size: 17px; color: var(--paper-white); margin: 0 0 10px; }
+.legal-section-body { font-family: var(--font-body); font-size: 15px; line-height: 1.6; color: var(--paper-muted); margin: 0; }
+
+@media (max-width: 700px) {
+  /* Same measured 190px top-clearance value as every other panel's own
+     <700px override — see .phi-scroll's note for the reasoning. */
+  .legal-back { top: 190px; }
+  /* 250px, not 190px, for the content — same fix as .consultation-scroll/
+     .detail-scroll's identical override: 190px alone matches the back
+     button's OWN top rather than clearing it (190 + the button's 34px
+     height + 26px breathing room). */
+  .legal-scroll { padding: 250px var(--space-4) 80px; }
+}
+
+/* Tablet (701-1024px): the chrome itself never wraps at this width (it
+   stays one row, same as desktop), so the back buttons keep their desktop
+   top:110px here — but there still isn't enough horizontal room beside a
+   38px-tall pill for the hero eyebrow text to sit at that same 110px
+   without the two colliding (confirmed directly: this only clears on its
+   own around ~1100px+). Isolated to its own min/max range, not folded into
+   the <700px block above (which also repositions the button itself and
+   tunes bottom padding for a wrapped mobile chrome that doesn't apply
+   here) or left to the desktop default (which doesn't clear at all). */
+@media (min-width: 701px) and (max-width: 1024px) {
+  .consultation-scroll, .detail-scroll, .legal-scroll { padding-top: 250px; }
 }
 
 /* The chrome only ever makes sense floating over a live WebGL canvas — until
@@ -930,7 +1269,8 @@ html, body {
 .webgl-stage:not(.is-webgl-active) .webgl-list-view,
 .webgl-stage:not(.is-webgl-active) .webgl-philosophy-view,
 .webgl-stage:not(.is-webgl-active) .webgl-detail-view,
-.webgl-stage:not(.is-webgl-active) .webgl-consultation-view {
+.webgl-stage:not(.is-webgl-active) .webgl-consultation-view,
+.webgl-stage:not(.is-webgl-active) .webgl-legal-view {
   display: none;
 }
 
@@ -952,7 +1292,7 @@ html, body {
 @media (prefers-reduced-motion: reduce) {
   .webgl-clock-colon { animation: none; }
   [data-sound-toggle][aria-pressed="true"] .webgl-tire { animation: none; }
-  .webgl-list-view, .webgl-philosophy-view, .webgl-detail-view, .webgl-consultation-view, .webgl-hint, .webgl-mode-toggle, .webgl-section-toggle, [data-open-consultation] { transition: none; }
+  .webgl-list-view, .webgl-philosophy-view, .webgl-detail-view, .webgl-consultation-view, .webgl-legal-view, .webgl-hint, .webgl-mode-toggle, .webgl-section-toggle, [data-open-consultation] { transition: none; }
   .phi-animate-in .phi-hero-text > *, .phi-animate-in .phi-hero-video { animation: none; }
   .phi-video-tile, .phi-reveal-media, .phi-reveal-img { transition: none; }
   .detail-hero > * { animation: none; }
@@ -960,6 +1300,8 @@ html, body {
   .consultation-hero.consultation-animate-in > * { animation: none; }
   .consultation-card, .consultation-quote, .consultation-notice, .consultation-field, .consultation-cta-row { transition: none; }
   .webgl-pill--primary::before, .consultation-cta::before { transition: none; }
+  .legal-hero.legal-animate-in > * { animation: none; }
+  .legal-section { transition: none; }
 }
 
 @media (max-width: 700px) {

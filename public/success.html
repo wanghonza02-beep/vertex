@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Consultation Confirmed — Vertex</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50,8 92,88 54,88 50,52' fill='%23C9A66B'/%3E%3Cpolygon points='50,8 8,88 46,88 50,52' fill='%23C9A66B' opacity='0.55'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Italiana&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --vertex-black: #0B0C0E;
+    --graphite: #1A1C1F;
+    --champagne-gold: #C9A66B;
+    --paper-white: #EDE8DD;
+    --paper-muted: #B9B4A7;
+    --paper-dim: #7C786F;
+    --blueprint-line: #2E3B47;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; min-height: 100%; background: var(--vertex-black); color: var(--paper-white);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  }
+  body { display: flex; align-items: center; justify-content: center; padding: 32px; }
+  .card {
+    width: 100%; max-width: 560px; border: 1px solid var(--blueprint-line); background: var(--graphite);
+    padding: 48px 40px; text-align: center;
+  }
+  .logo { width: 44px; height: 44px; margin: 0 auto 28px; display: block; }
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--champagne-gold); margin: 0 0 16px;
+  }
+  h1 {
+    font-family: 'Italiana', serif; font-weight: 400; font-size: clamp(28px, 5vw, 38px); line-height: 1.2;
+    color: var(--paper-white); margin: 0 0 32px;
+  }
+  .summary {
+    text-align: left; border-top: 1px solid var(--blueprint-line); border-bottom: 1px solid var(--blueprint-line);
+    padding: 24px 0; margin: 0 0 28px; display: grid; gap: 14px;
+  }
+  .summary-row { display: flex; justify-content: space-between; gap: 16px; font-size: 14px; }
+  .summary-label {
+    font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; font-size: 11px;
+    color: var(--paper-dim);
+  }
+  .summary-value { color: var(--paper-white); text-align: right; }
+  .note { color: var(--paper-muted); font-size: 15px; line-height: 1.6; margin: 0 0 32px; }
+  .cta {
+    display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em;
+    text-transform: uppercase; text-decoration: none; color: var(--vertex-black); background: var(--champagne-gold);
+    padding: 14px 28px; border: 1px solid var(--champagne-gold); transition: background 0.15s ease, color 0.15s ease;
+  }
+  .cta:hover { background: transparent; color: var(--champagne-gold); }
+  .ref { margin-top: 24px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--paper-dim); }
+  .demo-disclaimer {
+    margin: 28px 0 0; padding: 14px 16px; background: rgba(201,166,107,0.12); border: 1px solid var(--champagne-gold);
+    border-radius: 2px; font-size: 13px; line-height: 1.6; color: var(--paper-white); text-align: left;
+  }
+  .demo-disclaimer strong { color: var(--champagne-gold); text-transform: uppercase; letter-spacing: 0.04em; }
+  [data-loading] { color: var(--paper-dim); font-size: 14px; }
+</style>
+</head>
+<body>
+<main class="card">
+  <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Vertex">
+    <polygon points="50,8 92,88 54,88 50,52" fill="#C9A66B"></polygon>
+    <polygon points="50,8 8,88 46,88 50,52" fill="#C9A66B" opacity="0.55"></polygon>
+  </svg>
+  <p class="eyebrow">Consultation Confirmed</p>
+  <h1>Your build slot is reserved.</h1>
+
+  <div id="summary" class="summary" hidden></div>
+  <p id="loading" data-loading>Retrieving your reservation details…</p>
+  <p class="note">Payment received. Our concierge team will reach out within two business days to confirm every detail before your session.</p>
+
+  <a class="cta" href="/">Return to Vertex</a>
+  <p id="ref" class="ref" hidden></p>
+  <p class="demo-disclaimer"><strong>Demo Project</strong> — This is a fictional company built for web design purposes only. This was a Stripe test-mode payment — no real charge occurred.</p>
+</main>
+
+<script>
+(function () {
+  var params = new URLSearchParams(window.location.search);
+  var sessionId = params.get('session_id');
+  var loadingEl = document.getElementById('loading');
+  var summaryEl = document.getElementById('summary');
+  var refEl = document.getElementById('ref');
+
+  if (!sessionId) { loadingEl.remove(); return; }
+
+  var PATH_LABEL = { fleet: 'Fleet Acquisition', bespoke: 'Bespoke Commission' };
+
+  function row(label, value) {
+    return '<div class="summary-row"><span class="summary-label">' + label + '</span><span class="summary-value">' + value + '</span></div>';
+  }
+
+  fetch('/api/session?session_id=' + encodeURIComponent(sessionId))
+    .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+    .then(function (result) {
+      loadingEl.remove();
+      if (!result.ok) return;
+      var d = result.data;
+      var rows = '';
+      if (d.path_type) rows += row('Path', PATH_LABEL[d.path_type] || d.path_type);
+      if (d.location) rows += row('Location', d.location);
+      if (d.booking_date) rows += row('Date', d.booking_date);
+      if (d.time_slot) rows += row('Time', d.time_slot);
+      if (d.selected_car) rows += row('Model', d.selected_car);
+      if (typeof d.amount_total === 'number') rows += row('Amount Paid', '$' + (d.amount_total / 100).toLocaleString('en-US') + ' USD');
+      if (rows) { summaryEl.innerHTML = rows; summaryEl.hidden = false; }
+      refEl.textContent = 'Reference: ' + sessionId;
+      refEl.hidden = false;
+    })
+    .catch(function () { loadingEl.remove(); });
+})();
+</script>
+</body>
+</html>

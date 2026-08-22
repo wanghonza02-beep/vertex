@@ -4,12 +4,15 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node dev-server.js",
+    "dev:vite-only": "vite",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "three": "0.175.0"
+    "three": "0.175.0",
+    "@supabase/supabase-js": "^2.45.4",
+    "stripe": "^17.4.0"
   },
   "devDependencies": {
     "playwright": "^1.62.1",

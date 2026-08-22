@@ -1,5 +1,5 @@
 import mediaManifest from 'virtual:car-media';
-import { observeReveal, observeVideoLifecycle } from './panelReveal.js';
+import { observeReveal, observeVideoLifecycle, bindBackButtonScrollFade } from './panelReveal.js';
 
 /* The car detail page — a fourth full-panel view inside #webglStage, sitting
    at a HIGHER z-index (8) than both the 3D grid (canvas, z-index 1) and List
@@ -172,16 +172,19 @@ export function closeCarDetail(stage) {
   cleanupTimer = setTimeout(() => { if (content) content.innerHTML = ''; }, 280);
 }
 
-// Wires the static back button once at boot. Escape is centralized in
-// src/main.js instead of a listener per view — with the Consultation page
-// now able to sit ABOVE this one (see css/webgl-grid.css's z-index note),
-// two independent "if open, close" listeners on the same keydown event
-// could both fire from a single Escape press and close both panels at once;
-// main.js checks which one is actually topmost first.
+// Only wires what's intrinsic to this page's own content (icons) — same
+// split as consultationView.js's initConsultationView. The back button is
+// wired in src/main.js instead, not here: closing this panel alone isn't
+// enough, the WebGL grid also needs syncGridPause(stage, gridRef) to
+// actually resume its render loop, and gridRef only exists in main.js's
+// scope. Escape is centralized in src/main.js too — with the Consultation
+// page now able to sit ABOVE this one (see css/webgl-grid.css's z-index
+// note), two independent "if open, close" listeners on the same keydown
+// event could both fire from a single Escape press and close both panels
+// at once; main.js checks which one is actually topmost first.
 export function initDetailView(stage) {
   const view = stage.querySelector('[data-detail-view]');
   if (!view) return;
   window.VertexIcons && window.VertexIcons.refresh(view);
-  const backBtn = view.querySelector('[data-detail-back]');
-  if (backBtn) backBtn.addEventListener('click', (e) => { e.preventDefault(); closeCarDetail(stage); });
+  bindBackButtonScrollFade(view.querySelector('[data-detail-scroll]'), view.querySelector('[data-detail-back]'));
 }

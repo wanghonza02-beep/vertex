@@ -122,18 +122,6 @@
       </section>
 
       <section class="phi-section">
-        <div class="phi-section-head"><span class="phi-eyebrow">Selected Partnerships</span><span class="phi-meta">Placeholder</span></div>
-        <div class="phi-partner-row" aria-hidden="true">
-          <div class="phi-partner-slot"></div>
-          <div class="phi-partner-slot"></div>
-          <div class="phi-partner-slot"></div>
-          <div class="phi-partner-slot"></div>
-          <div class="phi-partner-slot"></div>
-        </div>
-        <p class="phi-note">No partnerships to disclose yet — this row is reserved for the day there are.</p>
-      </section>
-
-      <section class="phi-section">
         <div class="phi-section-head"><span class="phi-eyebrow">Our Workshop</span></div>
         <p class="phi-body phi-body--wide">Every build lives in one facility for the length of its commission — sourced, stripped, engineered and finished by the same hands throughout, not handed between subcontractors along the way.</p>
         <div class="phi-workshop-grid">
@@ -142,23 +130,57 @@
         </div>
       </section>
 
-      <footer class="phi-site-footer">
-        <div class="phi-footer-col phi-footer-brand">
-          <div class="phi-footer-logo"><img src="assets/svg/logo-mark.svg" alt=""><span>VERTEX</span></div>
-          <p class="phi-footer-copyright">© 2026 Vertex Atelier. All rights reserved.</p>
-        </div>
-        <nav class="phi-footer-col phi-footer-links" aria-label="Footer">
-          <a href="#" data-footer-section="fleet">Fleet</a>
-          <a href="#" data-footer-section="philosophy">Our Philosophy</a>
-          <a href="#" data-dummy>Privacy Policy</a>
-          <a href="#" data-dummy>Terms</a>
-        </nav>
-        <div class="phi-footer-col phi-footer-contact">
-          <div class="phi-footer-socials">
-            <a href="#" data-dummy>Instagram</a>
-            <a href="#" data-dummy>X / Twitter</a>
+      <!-- Structure rebuilt to strictly match a supplied reference screenshot
+           (Stay Connected + newsletter / Quick Links / Contact Us / Follow Us,
+           a divider, then a copyright+legal bottom bar) — see .vx-footer in
+           css/webgl-grid.css for the deliberate content departures from that
+           reference: no light/dark toggle (this brand has exactly one,
+           permanently dark theme — a toggle that didn't switch anything would
+           be a fake control) and only the site's one real social channel
+           (Instagram — X/Twitter dropped per a later request) rather than
+           four generic placeholder platforms. Privacy Policy / Terms of
+           Service / Cookie Settings link to real pages now (src/legalView.js,
+           the .webgl-legal-view panel below), not the data-dummy no-ops the
+           rest of the reference's chrome-adjacent links still are. -->
+      <footer class="vx-footer">
+        <div class="vx-footer-top">
+          <div class="vx-footer-brand">
+            <div class="vx-footer-logo"><img src="assets/svg/logo-mark.svg" alt=""><span>VERTEX</span></div>
+            <h3 class="vx-footer-headline">Stay Connected</h3>
+            <p class="vx-footer-sub">Join our list for build-slot openings and atelier news.</p>
+            <form class="vx-footer-newsletter" data-newsletter-form>
+              <input type="email" name="email" placeholder="Enter your email" required aria-label="Email address">
+              <button type="submit" aria-label="Subscribe"><i data-lucide="send" aria-hidden="true"></i></button>
+            </form>
           </div>
-          <a href="mailto:inquiries@vertex.com" class="phi-footer-email">inquiries@vertex.com</a>
+          <nav class="vx-footer-col" aria-label="Quick Links">
+            <h4 class="vx-footer-col-title">Quick Links</h4>
+            <a href="#" data-footer-section="fleet">Fleet</a>
+            <a href="#" data-footer-section="philosophy">Our Philosophy</a>
+            <a href="#" data-footer-open-consultation>Acquire or Commission</a>
+          </nav>
+          <div class="vx-footer-col">
+            <h4 class="vx-footer-col-title">Contact Us</h4>
+            <p>Private Atelier — by appointment only</p>
+            <p>Telephone: +1 (555) 010-0142</p>
+            <a href="mailto:enquiries@vertex-atelier.com" class="vx-footer-email">enquiries@vertex-atelier.com</a>
+          </div>
+          <div class="vx-footer-col">
+            <h4 class="vx-footer-col-title">Follow Us</h4>
+            <div class="vx-footer-socials">
+              <a href="https://www.instagram.com/wwwwng._design_/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i data-lucide="instagram" aria-hidden="true"></i></a>
+            </div>
+          </div>
+        </div>
+        <p class="vx-footer-disclaimer"><strong>Demo Project</strong> — This is a fictional company built for web design purposes only. Vertex is not a real company — nothing here is a genuine purchase, payment, or business.</p>
+        <div class="vx-footer-divider"></div>
+        <div class="vx-footer-bottom">
+          <span class="vx-footer-copyright">© 2026 Vertex Atelier. All rights reserved.</span>
+          <nav class="vx-footer-legal" aria-label="Legal">
+            <a href="#" data-legal-page="privacy">Privacy Policy</a>
+            <a href="#" data-legal-page="terms">Terms of Service</a>
+            <a href="#" data-legal-page="cookies">Cookie Settings</a>
+          </nav>
         </div>
       </footer>
 
@@ -179,7 +201,7 @@
   </div>
 
   <!-- Toggled in via .is-consultation-view — opened from the header's
-       "Request a build slot" pill (src/main.js), reachable from ANY other
+       "Acquire or Commission" pill (src/main.js), reachable from ANY other
        view (Fleet, List, Our Philosophy, or a car detail), so it sits at a
        HIGHER z-index (9) than all of them, including the car detail page
        (8) — see css/webgl-grid.css. Static content, like Our Philosophy
@@ -194,106 +216,121 @@
 
       <section class="consultation-hero">
         <p class="phi-eyebrow">Private Atelier Consultation</p>
-        <h1 class="consultation-title">Commission Your Legacy</h1>
+        <h1 class="consultation-title">Acquire or Commission</h1>
         <p class="consultation-subtitle">Private Atelier Consultation &amp; Specification Session</p>
-        <p class="phi-body phi-body--wide consultation-intro">This is not a purchase — it's an application. Vertex accepts a limited number of consultation sessions each year, each one a private, in-person specification meeting inside the atelier itself. Submitting the form below requests a session; it does not reserve a build. Allocation is confirmed only after that first conversation.</p>
+        <p class="phi-body phi-body--wide consultation-intro">Two distinct paths into the fleet. <strong>Acquire a Fleet Model</strong> — reserve one of our twelve completed showcase builds outright. Or <strong>Commission a Bespoke Build</strong> — tailor a brand-new project from the ground up, on a donor chassis of your choosing. Select a date below to begin.</p>
       </section>
 
-      <section class="consultation-experience">
-        <div class="phi-section-head"><span class="phi-eyebrow">The Atelier Experience</span><span class="phi-meta">01–04</span></div>
+      <!-- The 3-step booking wizard. Only .booking-steps (a static progress
+           indicator) and the empty [data-booking-step-body] container are
+           markup here — everything inside that container is rendered by
+           src/consultationView.js per step, since it's genuinely dynamic
+           (which calendar dates/slots are booked, which step is active),
+           not static editorial content. -->
+      <section class="booking-flow">
+        <div class="booking-steps" data-booking-steps aria-hidden="true">
+          <span class="booking-step-dot is-active" data-step-dot="1"><span class="booking-step-num">1</span><small>Date &amp; Time</small></span>
+          <span class="booking-step-line"></span>
+          <span class="booking-step-dot" data-step-dot="2"><span class="booking-step-num">2</span><small>Details</small></span>
+          <span class="booking-step-line"></span>
+          <span class="booking-step-dot" data-step-dot="3"><span class="booking-step-num">3</span><small>Confirm</small></span>
+        </div>
+        <div class="booking-step-body" data-booking-step-body></div>
+      </section>
+
+      <section class="consultation-vip">
+        <div class="phi-section-head"><span class="phi-eyebrow">VIP Hospitality &amp; White-Glove Logistics</span><span class="phi-meta">01–04</span></div>
         <div class="consultation-grid">
           <div class="consultation-card">
             <span class="consultation-card-index">01</span>
-            <h3 class="consultation-card-title">Private Facility Access</h3>
-            <p class="consultation-card-body">Behind-the-scenes access to our master workshop and dynamic engineering bay — the same floor every commission is built on, not a showroom staged for visitors.</p>
+            <h3 class="consultation-card-title">Private Transfers</h3>
+            <p class="consultation-card-body">Chauffeured airport or helipad transfer directly to the Atelier — a single private vehicle for the length of your visit.</p>
           </div>
           <div class="consultation-card">
             <span class="consultation-card-index">02</span>
-            <h3 class="consultation-card-title">Ergonomics &amp; Material Fitting</h3>
-            <p class="consultation-card-body">Hands-on tactile fitting for bespoke steering wheels, seating carbon weaves, and rare leather samples, before a single material decision is finalised.</p>
+            <h3 class="consultation-card-title">5-Star Partner Hotels</h3>
+            <p class="consultation-card-body">VIP concierge bookings at partner luxury suites — Four Seasons, Rosewood — arranged on your behalf for every Bespoke commission client.</p>
           </div>
           <div class="consultation-card">
             <span class="consultation-card-index">03</span>
-            <h3 class="consultation-card-title">Chief Engineer Alignment</h3>
-            <p class="consultation-card-body">One-on-one technical consultation with our lead designers and dynamic chassis engineers — the people who will actually build the car, in the room.</p>
+            <h3 class="consultation-card-title">White-Glove Global Delivery</h3>
+            <p class="consultation-card-body">Covered enclosed transport or direct air-freight shipping, arriving at your private garage anywhere in the world.</p>
           </div>
           <div class="consultation-card">
             <span class="consultation-card-index">04</span>
-            <h3 class="consultation-card-title">Bespoke Hospitality</h3>
-            <p class="consultation-card-body">Private lounge catering, track trial options, and a dedicated concierge for the length of your visit and every visit after.</p>
+            <h3 class="consultation-card-title">International Registration &amp; Customs</h3>
+            <p class="consultation-card-body">Full export and import handling, plus road homologation, managed end-to-end by Vertex on your behalf.</p>
           </div>
         </div>
-      </section>
-
-      <section class="consultation-terms">
-        <blockquote class="consultation-quote">
-          <p class="consultation-quote-amount" data-count="2,000">$<span class="phi-stat-value">0</span><span class="consultation-quote-currency">USD</span></p>
-          <p class="consultation-quote-body">Consultation Commitment — fully credited toward your final vehicle allocation should you proceed to a commission. It is not owed if you don't.</p>
-        </blockquote>
-        <p class="consultation-notice">All vehicle commissions, fleet allocations, and multi-million dollar transactions are conducted strictly in-person within our Atelier via private escrow contracts.</p>
-      </section>
-
-      <section class="consultation-form-section">
-        <div class="phi-section-head"><span class="phi-eyebrow">Application</span><span class="phi-meta">Two-minute form</span></div>
-        <form class="consultation-form" data-consultation-form novalidate>
-          <div class="consultation-field">
-            <label for="cFullName">Full name</label>
-            <input id="cFullName" name="fullName" type="text" required autocomplete="name" placeholder="Your full name">
-          </div>
-          <div class="consultation-field">
-            <label for="cContact">Encrypted email / direct phone</label>
-            <input id="cContact" name="contact" type="text" required placeholder="you@example.com or +1 555 010 0142">
-          </div>
-          <div class="consultation-field">
-            <label for="cLocation">Preferred atelier location</label>
-            <div class="select-wrap">
-              <select id="cLocation" name="location">
-                <option value="">Select…</option>
-                <option>Los Angeles</option>
-                <option>Miami</option>
-                <option>London</option>
-                <option>Dubai</option>
-                <option value="Undecided">Undecided</option>
-              </select>
-            </div>
-          </div>
-          <div class="consultation-field">
-            <label for="cVision">Vehicle focus / custom vision</label>
-            <textarea id="cVision" name="vision" rows="4" placeholder="Donor chassis, era, or the story behind the build you have in mind."></textarea>
-          </div>
-          <div class="consultation-cta-row">
-            <button type="submit" class="consultation-cta" data-consultation-submit>Apply for Consultation Slot — $2,000 USD</button>
-            <p class="consultation-form-note">Applications are reviewed within two business days. The $2,000 commitment is only requested once a session is confirmed.</p>
-          </div>
-        </form>
       </section>
 
       <!-- Exact same footer markup as .webgl-philosophy-view's — see
-           css/webgl-grid.css's .phi-site-footer (unscoped, so it renders
-           identically here) and src/main.js's [data-footer-section] wiring
-           (stage-wide querySelectorAll, so this second copy is picked up
+           css/webgl-grid.css's .vx-footer (unscoped, so it renders
+           identically here) and src/main.js's [data-footer-section] /
+           [data-footer-open-consultation] / [data-newsletter-form] wiring
+           (all stage-wide querySelectorAll, so this second copy is picked up
            automatically with no JS changes). -->
-      <footer class="phi-site-footer">
-        <div class="phi-footer-col phi-footer-brand">
-          <div class="phi-footer-logo"><img src="assets/svg/logo-mark.svg" alt=""><span>VERTEX</span></div>
-          <p class="phi-footer-copyright">© 2026 Vertex Atelier. All rights reserved.</p>
-        </div>
-        <nav class="phi-footer-col phi-footer-links" aria-label="Footer">
-          <a href="#" data-footer-section="fleet">Fleet</a>
-          <a href="#" data-footer-section="philosophy">Our Philosophy</a>
-          <a href="#" data-dummy>Privacy Policy</a>
-          <a href="#" data-dummy>Terms</a>
-        </nav>
-        <div class="phi-footer-col phi-footer-contact">
-          <div class="phi-footer-socials">
-            <a href="#" data-dummy>Instagram</a>
-            <a href="#" data-dummy>X / Twitter</a>
+      <footer class="vx-footer">
+        <div class="vx-footer-top">
+          <div class="vx-footer-brand">
+            <div class="vx-footer-logo"><img src="assets/svg/logo-mark.svg" alt=""><span>VERTEX</span></div>
+            <h3 class="vx-footer-headline">Stay Connected</h3>
+            <p class="vx-footer-sub">Join our list for build-slot openings and atelier news.</p>
+            <form class="vx-footer-newsletter" data-newsletter-form>
+              <input type="email" name="email" placeholder="Enter your email" required aria-label="Email address">
+              <button type="submit" aria-label="Subscribe"><i data-lucide="send" aria-hidden="true"></i></button>
+            </form>
           </div>
-          <a href="mailto:inquiries@vertex.com" class="phi-footer-email">inquiries@vertex.com</a>
+          <nav class="vx-footer-col" aria-label="Quick Links">
+            <h4 class="vx-footer-col-title">Quick Links</h4>
+            <a href="#" data-footer-section="fleet">Fleet</a>
+            <a href="#" data-footer-section="philosophy">Our Philosophy</a>
+            <a href="#" data-footer-open-consultation>Acquire or Commission</a>
+          </nav>
+          <div class="vx-footer-col">
+            <h4 class="vx-footer-col-title">Contact Us</h4>
+            <p>Private Atelier — by appointment only</p>
+            <p>Telephone: +1 (555) 010-0142</p>
+            <a href="mailto:enquiries@vertex-atelier.com" class="vx-footer-email">enquiries@vertex-atelier.com</a>
+          </div>
+          <div class="vx-footer-col">
+            <h4 class="vx-footer-col-title">Follow Us</h4>
+            <div class="vx-footer-socials">
+              <a href="https://www.instagram.com/wwwwng._design_/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i data-lucide="instagram" aria-hidden="true"></i></a>
+            </div>
+          </div>
+        </div>
+        <p class="vx-footer-disclaimer"><strong>Demo Project</strong> — This is a fictional company built for web design purposes only. Vertex is not a real company — nothing here is a genuine purchase, payment, or business.</p>
+        <div class="vx-footer-divider"></div>
+        <div class="vx-footer-bottom">
+          <span class="vx-footer-copyright">© 2026 Vertex Atelier. All rights reserved.</span>
+          <nav class="vx-footer-legal" aria-label="Legal">
+            <a href="#" data-legal-page="privacy">Privacy Policy</a>
+            <a href="#" data-legal-page="terms">Terms of Service</a>
+            <a href="#" data-legal-page="cookies">Cookie Settings</a>
+          </nav>
         </div>
       </footer>
 
     </div>
+  </div>
+
+  <!-- Toggled in via .is-legal-view — opened from a Privacy Policy / Terms
+       of Service / Cookie Settings link in either footer above
+       (src/main.js -> src/legalView.js). Placed after .webgl-consultation-view
+       in the DOM deliberately: both sit at the same z-index (9, see
+       css/webgl-grid.css) since a legal link can be clicked from inside an
+       open Consultation page, and CSS resolves equal z-index ties by DOM
+       order — being later here is what lets this reliably cover
+       Consultation rather than the reverse. One shared shell for all three
+       pages, like the car detail page's one shell for 12 cars — content is
+       rebuilt per page by src/legalView.js, nothing here is static except
+       the back button. -->
+  <div class="webgl-legal-view" data-legal-view aria-hidden="true">
+    <button type="button" class="legal-back webgl-pill" data-legal-back>
+      <i data-lucide="arrow-left" aria-hidden="true"></i> Back
+    </button>
+    <div class="legal-scroll" data-legal-scroll data-legal-content></div>
   </div>
 
   <div class="webgl-chrome">
@@ -317,7 +354,7 @@
             Sound <span data-sound-label>Off</span>
           </button>
           <span class="webgl-readout"><strong data-studio-clock><span data-clock-hh>00</span><span class="webgl-clock-colon" aria-hidden="true">:</span><span data-clock-mm>00</span></strong> &nbsp;Studio</span>
-          <button type="button" class="webgl-pill webgl-pill--primary" data-open-consultation>Request a build slot</button>
+          <button type="button" class="webgl-pill webgl-pill--primary" data-open-consultation>Acquire or Commission</button>
         </div>
       </div>
       <p class="webgl-hint">Drag to orbit the fleet</p>
@@ -533,6 +570,7 @@
               <span class="checkbox-box"></span>
               <span class="checkbox-text">Keep me informed of future build slots and archive additions.</span>
             </label>
+            <p class="footer-disclaimer"><strong>Demo Project</strong> — This is a fictional company built for web design purposes only. Vertex is not a real company — please don't submit genuine personal information.</p>
             <div class="form-foot">
               <button type="submit" class="btn btn--primary btn--lg">Request a build slot</button>
               <span class="form-foot-note">Responses within two business days.</span>
@@ -554,13 +592,14 @@
           </a>
           <p>Iconic chassis, rebuilt at the point where character meets engineering.</p>
           <div class="footer-social">
-            <a href="#" aria-label="Instagram"><i data-lucide="instagram"></i></a>
+            <a href="https://www.instagram.com/wwwwng._design_/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i data-lucide="instagram"></i></a>
             <a href="#" aria-label="YouTube"><i data-lucide="youtube"></i></a>
             <a href="mailto:enquiries@vertex-atelier.com" aria-label="Email"><i data-lucide="mail"></i></a>
           </div>
         </div>
         <div class="footer-cols" id="footerColumns"></div>
       </div>
+      <p class="footer-disclaimer"><strong>Demo Project</strong> — This is a fictional company built for web design purposes only. Vertex is not a real company — nothing here is a genuine purchase, payment, or business.</p>
       <div class="footer-bottom">
         <span>© <span id="year">2026</span> Vertex. All builds one of one.</span>
         <span><a href="#">Privacy</a> · <a href="#">Terms</a></span>

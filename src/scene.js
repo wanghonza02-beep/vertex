@@ -63,13 +63,22 @@ function lerp(a, b, t) { return a + (b - a) * t; }
 
 export async function initWebGLGrid(container, onCardActivate) {
   const canvas = container.querySelector('canvas');
+  // Coarse pointer (touch) stands in for "mobile/tablet GPU" here rather
+  // than a width check — a touch laptop or a narrow-but-precise trackpad
+  // device would otherwise be mis-bucketed. MSAA and a full 2x pixel ratio
+  // are the two most expensive things this renderer does, and the least
+  // noticeable on a small, already-dense phone screen: AA smooths edges
+  // pixels most phones are too small/dense to show jagged in the first
+  // place, and a full 2x buffer is 4x the fill-rate of 1x for detail a
+  // phone panel can't fully resolve anyway.
+  const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
   let renderer;
   try {
-    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: !isCoarsePointer, alpha: true, powerPreference: 'high-performance' });
   } catch (err) {
     return null;
   }
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isCoarsePointer ? 1.5 : 2));
   renderer.setClearColor(0x000000, 0);
 
   const scene = new THREE.Scene();
@@ -112,6 +121,14 @@ export async function initWebGLGrid(container, onCardActivate) {
   // own up-to-7 videos, or a detail page's gallery). tick() simply stops
   // rescheduling itself while paused rather than doing hidden work every frame.
   let paused = false;
+  // Independent from `paused` above (which src/main.js drives whenever
+  // another view covers this canvas): the tab itself can also go into the
+  // background (switch tabs, minimize, lock the phone) while still showing
+  // the Fleet grid, which none of main.js's view-switching logic would ever
+  // see. Same underlying waste as an uncovered-but-invisible canvas — a
+  // render loop and 12 decoding videos nobody's looking at — so it gets
+  // the same treatment, just from a second, independent trigger.
+  let tabHidden = false;
   let rafId = null;
 
   const raycaster = new THREE.Raycaster();
@@ -242,8 +259,28 @@ export async function initWebGLGrid(container, onCardActivate) {
   ro.observe(container);
   resize();
 
+  function stopLoop() {
+    if (rafId != null) cancelAnimationFrame(rafId);
+    rafId = null;
+  }
+  function startLoopIfActive() {
+    if (!destroyed && !paused && !tabHidden && rafId == null) rafId = requestAnimationFrame(tick);
+  }
+  function handleVisibilityChange() {
+    if (document.hidden) {
+      tabHidden = true;
+      stopLoop();
+      cardSources.forEach((s) => { s.video.pause(); });
+    } else {
+      tabHidden = false;
+      if (!paused) cardSources.forEach((s) => { s.video.play().catch(() => {}); });
+      startLoopIfActive();
+    }
+  }
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+
   function tick() {
-    if (destroyed || paused) return; // no reschedule here — resume() below restarts the chain
+    if (destroyed || paused || tabHidden) return; // no reschedule here — resume()/handleVisibilityChange above restart the chain
     if (!dragging && resetting) {
       // Eased glide back to the landing pan (0,0), not an instant snap.
       panX = lerp(panX, 0, 0.09);
@@ -279,17 +316,18 @@ export async function initWebGLGrid(container, onCardActivate) {
     pause() {
       if (paused) return;
       paused = true;
-      if (rafId != null) cancelAnimationFrame(rafId);
-      rafId = null;
+      stopLoop();
       cardSources.forEach((s) => { s.video.pause(); });
     },
     // Resumes both halves paused above and restarts tick()'s self-scheduling
-    // chain, which fully stopped rather than idling.
+    // chain — unless the tab itself is currently backgrounded, in which case
+    // handleVisibilityChange's own "visible again" branch is what actually
+    // restarts it, once that happens.
     resume() {
       if (!paused) return;
       paused = false;
-      cardSources.forEach((s) => { s.video.play().catch(() => {}); });
-      rafId = requestAnimationFrame(tick);
+      if (!tabHidden) cardSources.forEach((s) => { s.video.play().catch(() => {}); });
+      startLoopIfActive();
     },
     destroy() {
       destroyed = true;
@@ -299,6 +337,7 @@ export async function initWebGLGrid(container, onCardActivate) {
       window.removeEventListener('pointerup', onPointerUp);
       window.removeEventListener('pointercancel', onPointerUp);
       canvas.removeEventListener('pointerleave', onPointerLeaveCanvas);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       geometry.dispose();
       cardSources.forEach(disposeFleetCardSource);
       pool.forEach(p => p.mesh.material.dispose());

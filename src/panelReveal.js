@@ -70,6 +70,29 @@ export function observeReveal(root, els) {
   return observer;
 }
 
+/* Companion to observeReveal, for stat figures specifically: replays the
+   count-up every time the element re-enters view, not just once per panel
+   visit. Deliberately a separate observer rather than dropping the
+   observer.unobserve(el) from observeReveal above — a video tile or image
+   silently re-fading in every time a scroll wiggle passes it would look
+   glitchy, but a number counting up again on revisit is the actual point
+   for a stat figure, not a bug to guard against. Same threshold/rootMargin
+   as observeReveal so both fire at the same scroll position. */
+export function observeStatCounters(root, els) {
+  if (!els.length) return null;
+  if (typeof IntersectionObserver !== 'function') {
+    els.forEach((el) => animateStatCounter(el));
+    return null;
+  }
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) animateStatCounter(entry.target);
+    });
+  }, { root, threshold: 0.2, rootMargin: '25% 0px' });
+  els.forEach((el) => observer.observe(el));
+  return observer;
+}
+
 /* Companion to observeReveal above, for a longer-lived concern: once a tile
    has been revealed, its <video> just keeps looping forever, even scrolled
    far past — with up to 7 videos on Our Philosophy alone, that's several
@@ -85,6 +108,26 @@ export function observeReveal(root, els) {
    triggers the FIRST play, at its own (tighter) threshold. A wide rootMargin
    (50% of the panel's height past each edge) avoids pause/resume thrashing
    from small scroll jitters right at the boundary. */
+/* Consultation/Detail/Legal's "back" pills are all position:absolute
+   against the whole (non-scrolling) panel, not against their own panel's
+   inner scroll container — so each stays at one fixed screen position no
+   matter how far that inner content has scrolled. That's fine at the top
+   of a page (there's normally nothing else up there to collide with), but
+   a visitor scrolled deep into the page — e.g. Consultation's own footer
+   copy — finds it parked on top of whatever content happens to land at
+   that same height, worst case directly over the footer's newsletter
+   input. Fading it out past a small scroll threshold (and back in near the
+   top) sidesteps that without needing pixel-exact padding math for every
+   possible scroll depth. Bound once against the panel's persistent scroll
+   element and back button (both survive every open/close), not re-bound
+   per open. */
+export function bindBackButtonScrollFade(root, backBtn, threshold = 32) {
+  if (!root || !backBtn) return;
+  const update = () => backBtn.classList.toggle('is-scrolled-past', root.scrollTop > threshold);
+  root.addEventListener('scroll', update, { passive: true });
+  update();
+}
+
 export function observeVideoLifecycle(root, containers) {
   const withVideo = containers.filter((el) => el.querySelector('video'));
   if (!withVideo.length || typeof IntersectionObserver !== 'function') return null;

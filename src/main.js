@@ -2,20 +2,23 @@ import { initWebGLGrid } from './scene.js';
 import { FLEET_DATA } from './fleetData.js';
 import { openCarDetail, closeCarDetail, initDetailView, isCarDetailOpen } from './detailView.js';
 import { openConsultation, closeConsultation, initConsultationView, isConsultationOpen } from './consultationView.js';
-import { resetStatFigure, animateStatCounter, observeReveal, observeVideoLifecycle } from './panelReveal.js';
+import { openLegal, closeLegal, initLegalView, isLegalOpen } from './legalView.js';
+import { resetStatFigure, observeReveal, observeStatCounters, observeVideoLifecycle } from './panelReveal.js';
+import { supabase } from './supabaseClient.js';
 
 // The 3D grid must render whenever any part of it could still be visible —
 // including List View, which deliberately shows it blurred behind frosted
 // glass (see css/webgl-grid.css) — but NOT during Our Philosophy, a car
-// detail page, or the Consultation page, all solid backgrounds that cover it
-// completely. Called after every navigation rather than threading
-// pause()/resume() calls through each handler individually: cheaper to
-// assert the correct end state once than to reason about which specific
-// transition changed it, and both scene.js methods are already idempotent
-// no-ops if the state doesn't actually change.
+// detail page, the Consultation page, or a legal page, all solid
+// backgrounds that cover it completely. Called after every navigation
+// rather than threading pause()/resume() calls through each handler
+// individually: cheaper to assert the correct end state once than to
+// reason about which specific transition changed it, and both scene.js
+// methods are already idempotent no-ops if the state doesn't actually
+// change.
 function syncGridPause(stage, gridRef) {
   if (!gridRef.current) return;
-  const shouldPause = stage.classList.contains('is-philosophy-view') || isCarDetailOpen() || isConsultationOpen();
+  const shouldPause = stage.classList.contains('is-philosophy-view') || isCarDetailOpen() || isConsultationOpen() || isLegalOpen();
   if (shouldPause) gridRef.current.pause();
   else gridRef.current.resume();
 }
@@ -51,8 +54,24 @@ function initChrome(stage, gridRef) {
   if (brand) {
     brand.addEventListener('click', (e) => {
       e.preventDefault();
-      closeCarDetail(stage); // "reset view to home" should also back out of any open car detail
+      // Unlike every other back action on this page (which reveals
+      // whatever view was directly behind the one being closed — see the
+      // Consultation/Legal back button comments below), the logo is a
+      // literal "take me home" control: it MUST always land on the primary
+      // landing page (Fleet, 3D grid), regardless of what was open or which
+      // section/mode was active. fleetTab.click()/gridBtn.click() reuse
+      // their own handlers' close-everything-and-switch logic rather than
+      // duplicating it here; closeCarDetail/closeConsultation/closeLegal
+      // still run directly after in case one of those tabs was already
+      // marked active and so never fired (e.g. Consultation opened while
+      // already on Fleet+Grid).
+      const fleetTab = chrome.querySelector('[data-section-tab="fleet"]');
+      if (fleetTab && !fleetTab.classList.contains('is-active')) fleetTab.click();
+      const gridBtn = chrome.querySelector('[data-mode-toggle="grid"]');
+      if (gridBtn && !gridBtn.classList.contains('is-active')) gridBtn.click();
+      closeCarDetail(stage);
       closeConsultation(stage);
+      closeLegal(stage);
       syncGridPause(stage, gridRef);
       gridRef.current && gridRef.current.resetView();
     });
@@ -102,6 +121,7 @@ function initChrome(stage, gridRef) {
       e.preventDefault();
       closeCarDetail(stage);
       closeConsultation(stage);
+      closeLegal(stage);
       const section = tab.getAttribute('data-section-tab');
       sectionTabs.forEach((t) => { t.classList.remove('is-active'); t.setAttribute('aria-pressed', 'false'); });
       tab.classList.add('is-active');
@@ -124,6 +144,7 @@ function initChrome(stage, gridRef) {
       e.preventDefault();
       closeCarDetail(stage); // same reasoning as the section tabs above
       closeConsultation(stage);
+      closeLegal(stage);
       const mode = btn.getAttribute('data-mode-toggle');
       modeButtons.forEach((b) => { b.classList.remove('is-active'); b.setAttribute('aria-pressed', 'false'); });
       btn.classList.add('is-active');
@@ -134,7 +155,7 @@ function initChrome(stage, gridRef) {
     });
   });
 
-  // Header's "Request a build slot" pill: opens the Consultation page.
+  // Header's "Acquire or Commission" pill: opens the Consultation page.
   // Reachable from any view (it's part of the persistent chrome, always
   // visible), which is exactly why Consultation itself doesn't need to
   // close whatever's currently open first — it just covers it (see its
@@ -148,27 +169,28 @@ function initChrome(stage, gridRef) {
     });
   }
 
-  // Consultation's own "Return to fleet" back button: unlike the car detail
-  // page's back button (which only ever needs to reveal whatever was
-  // directly behind it), this one is reachable from literally any view, and
-  // its label is a promise — clicking it should always land on Fleet, not
-  // "whatever was open before," so it also closes a car detail page and
-  // forces the Fleet section tab if Our Philosophy was showing underneath.
+  // Consultation's own back button: reveals whatever was directly behind
+  // it — same, simpler pattern as the car detail page's back button below,
+  // NOT the old "always force Fleet" behavior. Opening Consultation never
+  // touches Our Philosophy's or a car detail page's own state (it just
+  // covers them — see the z-index note in css/webgl-grid.css), so that
+  // state is still sitting there untouched underneath; closing Consultation
+  // alone is enough for it to reappear correctly. This matters specifically
+  // for footer-triggered opens (Our Philosophy's footer link opens
+  // Consultation without leaving Philosophy) — forcing Fleet here would
+  // strand the visitor somewhere they never asked to go.
   const consultationBackBtn = stage.querySelector('[data-consultation-back]');
   if (consultationBackBtn) {
     consultationBackBtn.addEventListener('click', (e) => {
       e.preventDefault();
       closeConsultation(stage);
-      closeCarDetail(stage);
-      const fleetTab = chrome.querySelector('[data-section-tab="fleet"]');
-      if (fleetTab && !fleetTab.classList.contains('is-active')) fleetTab.click(); // click(), not a manual state copy — reuses the section-tab handler's own enter/leave + syncGridPause logic
-      else syncGridPause(stage, gridRef);
+      syncGridPause(stage, gridRef);
     });
   }
 
-  // Footer's Fleet / Our Philosophy links (inside .webgl-philosophy-view,
-  // populated below) just delegate to the real section tabs above rather
-  // than duplicating the switch-view logic.
+  // Footer's Fleet / Our Philosophy links (inside .webgl-philosophy-view and
+  // .webgl-consultation-view, populated below) just delegate to the real
+  // section tabs above rather than duplicating the switch-view logic.
   stage.querySelectorAll('[data-footer-section]').forEach((link) => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
@@ -176,6 +198,93 @@ function initChrome(stage, gridRef) {
       if (target) target.click();
     });
   });
+
+  // Footer's "Acquire or Commission" link: same open logic as the header
+  // pill above, just a distinct attribute (data-open-consultation is
+  // queried with chrome.querySelector — singular, scoped to .webgl-chrome —
+  // so a second element carrying that same attribute outside the chrome
+  // would silently never get wired here).
+  stage.querySelectorAll('[data-footer-open-consultation]').forEach((link) => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      openConsultation(stage);
+      syncGridPause(stage, gridRef);
+    });
+  });
+
+  // Footer newsletter forms (one per footer instance — Our Philosophy and
+  // Consultation each have their own copy of the same markup). No real
+  // backend, same simulated-delay + toast pattern as the consultation form
+  // itself (src/consultationView.js) and the old inquiry form (js/form.js),
+  // reusing the existing window.VertexToast rather than a third
+  // implementation of the same confirmation UI.
+  // Inserts straight into Supabase's newsletter_subscribers table from the
+  // browser using the anon key — that table's RLS only grants insert (see
+  // supabase/schema.sql), so this can add a row but never read one back.
+  // Falls back to the old simulated-delay + toast demo when Supabase isn't
+  // configured yet, so the footer form never looks broken either way.
+  stage.querySelectorAll('[data-newsletter-form]').forEach((form) => {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const btn = form.querySelector('button');
+      const emailInput = form.querySelector('input[name="email"]');
+      const email = emailInput ? emailInput.value.trim() : '';
+      if (btn) btn.disabled = true;
+
+      const finish = (message, type) => {
+        if (btn) btn.disabled = false;
+        window.VertexToast && window.VertexToast.show(message, type);
+      };
+
+      if (!supabase) {
+        setTimeout(() => { form.reset(); finish('You\'re on the list — we\'ll be in touch.', 'success'); }, 700);
+        return;
+      }
+
+      supabase.from('newsletter_subscribers').insert({ email }).then(({ error }) => {
+        if (error) {
+          // 23505 = unique_violation — already subscribed reads as success
+          // to the visitor, not an error; anything else is a real failure.
+          if (error.code === '23505') { form.reset(); finish('You\'re already on the list.', 'success'); return; }
+          console.error('Newsletter signup failed:', error);
+          finish('Something went wrong — please try again.', 'error');
+          return;
+        }
+        form.reset();
+        finish('You\'re on the list — we\'ll be in touch.', 'success');
+      });
+    });
+  });
+
+  // Footer's Privacy Policy / Terms of Service / Cookie Settings links
+  // (both footer instances carry all three) open the matching legal page.
+  // Doesn't close whatever's currently open first — it just covers it,
+  // same reasoning as the Consultation pill above (including when that
+  // "whatever" is Consultation itself, opened from ITS OWN footer).
+  stage.querySelectorAll('[data-legal-page]').forEach((link) => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      openLegal(stage, link.getAttribute('data-legal-page'));
+      syncGridPause(stage, gridRef);
+    });
+  });
+
+  // Legal page's own "Back" button: reveals whatever was directly behind
+  // it — same reasoning as Consultation's back button above, not the old
+  // "always force Fleet" behavior. A legal page can be opened from Our
+  // Philosophy's footer OR from inside an open Consultation page (its
+  // footer carries the same three links); either way, opening it never
+  // touched what was underneath, so closing it alone is enough to correctly
+  // land back on Consultation, Our Philosophy, or Fleet — whichever it
+  // actually was.
+  const legalBackBtn = stage.querySelector('[data-legal-back]');
+  if (legalBackBtn) {
+    legalBackBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      closeLegal(stage);
+      syncGridPause(stage, gridRef);
+    });
+  }
 
   const hhEl = chrome.querySelector('[data-clock-hh]');
   const mmEl = chrome.querySelector('[data-clock-mm]');
@@ -194,15 +303,46 @@ function initChrome(stage, gridRef) {
   populateListView(stage, gridRef);
   initDetailView(stage);
   initConsultationView(stage);
+  initLegalView(stage);
 
-  // Centralized Escape handling for both overlay panels — see the comment
-  // in detailView.js's initDetailView for why this isn't two independent
-  // per-view listeners: Consultation sits above the car detail page, so a
-  // single Escape press should close only the topmost open one.
+  // Our Philosophy's footer icons (send/instagram): unlike the
+  // Consultation and detail views, nothing else ever refreshes icons inside
+  // .webgl-philosophy-view — its old footer was plain text, not icon-based,
+  // so this never mattered before. Static content, not per-visit, so this
+  // runs once at boot rather than on every enterPhilosophyView() call.
+  const philosophyViewEl = stage.querySelector('[data-philosophy-view]');
+  if (philosophyViewEl) window.VertexIcons && window.VertexIcons.refresh(philosophyViewEl);
+
+  // Car detail page's own "Back to fleet" button: wired here (not inside
+  // detailView.js's initDetailView, which only has stage, not gridRef) for
+  // the same reason the consultation back button above is — closing the
+  // panel alone leaves the grid paused forever, since syncGridPause is what
+  // actually restarts scene.js's render loop. This was the missing call
+  // behind the WebGL canvas permanently freezing after returning from any
+  // car detail page: closeCarDetail() only ever toggled is-detail-view off;
+  // nothing downstream of that ever called resume() on the grid handle.
+  const detailBackBtn = stage.querySelector('[data-detail-back]');
+  if (detailBackBtn) {
+    detailBackBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      closeCarDetail(stage);
+      syncGridPause(stage, gridRef);
+    });
+  }
+
+  // Centralized Escape handling for all three overlay panels — see the
+  // comment in detailView.js's initDetailView for why this isn't three
+  // independent per-view listeners: a legal page can sit above Consultation
+  // (opened from its footer), which can itself sit above a car detail page,
+  // so a single Escape press should close only the topmost open one —
+  // checked in that same top-to-bottom order. Same syncGridPause gap as the
+  // back buttons above applied here too — Escape out of any of these left
+  // the grid paused with nothing left to ever resume it.
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
-    if (isConsultationOpen()) closeConsultation(stage);
-    else if (isCarDetailOpen()) closeCarDetail(stage);
+    if (isLegalOpen()) { closeLegal(stage); syncGridPause(stage, gridRef); }
+    else if (isConsultationOpen()) { closeConsultation(stage); syncGridPause(stage, gridRef); }
+    else if (isCarDetailOpen()) { closeCarDetail(stage); syncGridPause(stage, gridRef); }
   });
 }
 
@@ -219,21 +359,27 @@ function replayHeroEntrance(philosophyView) {
   hero.classList.add('phi-animate-in');
 }
 
-// Two IntersectionObserver instances for the whole panel at a time, rebuilt
-// on every entry (see enterPhilosophyView) — holding module-level references
-// is what lets us .disconnect() the previous ones instead of stacking fresh
-// observers on the same elements every time the user re-opens the section.
+// Three IntersectionObserver instances for the whole panel at a time,
+// rebuilt on every entry (see enterPhilosophyView) — holding module-level
+// references is what lets us .disconnect() the previous ones instead of
+// stacking fresh observers on the same elements every time the user
+// re-opens the section.
 let philosophyObserver = null;
+let philosophyStatObserver = null;
 let philosophyVideoLifecycle = null;
 
 // Called once per visit to Our Philosophy (from the section-tab handler).
 // Resets every replayable element back to its "not yet entered" state, then
 // re-observes all of it against .phi-scroll (the panel's own scrolling
 // element — this stage is otherwise fixed/non-scrolling, so the default
-// viewport root would never fire). Media reveals + autoplays + (for stats)
-// counts up the instant it crosses into view; the hero block is above the
-// fold and uses the separate .phi-animate-in keyframe system instead, so it's
-// excluded here and handled directly.
+// viewport root would never fire). Media reveals + autoplays the instant it
+// crosses into view, once per visit (observeReveal); stats count up every
+// time they cross into view, including scrolling past and back within the
+// SAME visit (observeStatCounters) — a video tile silently re-fading in on
+// every scroll wiggle would look glitchy, but a number counting up again on
+// revisit is the actual ask, not a bug to guard against. The hero block is
+// above the fold and uses the separate .phi-animate-in keyframe system
+// instead, so it's excluded here and handled directly.
 function enterPhilosophyView(stage) {
   const philosophyView = stage.querySelector('[data-philosophy-view]');
   if (!philosophyView) return;
@@ -248,11 +394,13 @@ function enterPhilosophyView(stage) {
   statEls.forEach(resetStatFigure);
 
   if (philosophyObserver) { philosophyObserver.disconnect(); philosophyObserver = null; }
+  if (philosophyStatObserver) { philosophyStatObserver.disconnect(); philosophyStatObserver = null; }
   if (philosophyVideoLifecycle) { philosophyVideoLifecycle.disconnect(); philosophyVideoLifecycle = null; }
 
   const root = stage.querySelector('.phi-scroll');
   if (!root) return;
-  philosophyObserver = observeReveal(root, [...mediaEls, ...statEls]);
+  philosophyObserver = observeReveal(root, [...mediaEls]);
+  philosophyStatObserver = observeStatCounters(root, [...statEls]);
   // mediaEls includes .phi-reveal-img (plain images, no <video>) — harmless,
   // observeVideoLifecycle filters those out itself. The hero video isn't in
   // mediaEls (it's above the fold and played directly above, not through the
@@ -272,6 +420,7 @@ function leavePhilosophyView(stage) {
   if (!philosophyView) return;
   philosophyView.querySelectorAll('video').forEach((v) => { v.pause(); v.currentTime = 0; });
   if (philosophyObserver) { philosophyObserver.disconnect(); philosophyObserver = null; }
+  if (philosophyStatObserver) { philosophyStatObserver.disconnect(); philosophyStatObserver = null; }
   if (philosophyVideoLifecycle) { philosophyVideoLifecycle.disconnect(); philosophyVideoLifecycle = null; }
 }
 
