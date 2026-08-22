@@ -491,8 +491,21 @@ async function boot() {
   }
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', boot);
-} else {
-  boot();
-}
+// Always wait for the DOMContentLoaded EVENT — never shortcut on
+// document.readyState. This file is a type="module" script, which (like a
+// classic <script defer>) only ever starts running once parsing is already
+// done, so readyState is ALREADY 'interactive' by the time this line runs,
+// every single time, regardless of where this script sits relative to
+// others. Checking readyState here can never catch the "still loading" case
+// it was written for, so it always fell through to calling boot()
+// immediately — fine in dev, where Vite serves this script in the same
+// position it has in source (after the legacy js/*.js <script defer> tags
+// that define window.VertexIcons/VertexToast), but broken in a production
+// build, where Vite hoists the bundled module script up into <head>, well
+// before those. DOMContentLoaded is the one checkpoint the platform
+// guarantees fires only once EVERY deferred/module script (this one and
+// all the legacy ones, in whatever order the page actually has them) has
+// already finished running — so listening for it unconditionally is
+// correct regardless of tag order, immune to however a future build
+// happens to arrange these scripts.
+document.addEventListener('DOMContentLoaded', boot);
