@@ -123,7 +123,7 @@ html.has-custom-cursor input, html.has-custom-cursor textarea, html.has-custom-c
    ========================================================================== */
 .site-header { position: fixed; top: 0; left: 0; right: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; gap: var(--space-8); height: 78px; padding: 0 var(--gutter-page); border-bottom: 1px solid transparent; background: transparent; transition: background-color var(--duration-base) var(--ease-standard), border-color var(--duration-base) var(--ease-standard); }
 @media (min-width: 900px) { .site-header { padding: 0 var(--gutter-page-wide); } }
-.site-header.is-scrolled { background: rgba(11,12,14,0.72); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom-color: var(--line-structural); }
+.site-header.is-scrolled { background: rgba(11,12,14,0.72); backdrop-filter: blur(14px); border-bottom-color: var(--line-structural); }
 .logo-link { display: inline-flex; align-items: center; gap: 12px; border-bottom: 0; }
 .logo-link .wordmark { font-family: var(--font-luxury); font-weight: var(--weight-luxury); font-size: 20px; letter-spacing: var(--tracking-wordmark); color: var(--paper-white); }
 .logo-link:hover .wordmark { color: var(--paper-white); }
@@ -342,7 +342,7 @@ html.has-custom-cursor input, html.has-custom-cursor textarea, html.has-custom-c
 /* ==========================================================================
    Overlay — build detail dialog + image lightbox (see dialog.js)
    ========================================================================== */
-.vx-overlay { position: fixed; inset: 0; z-index: 100; background: var(--surface-scrim); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; padding: var(--space-6); opacity: 0; transition: opacity var(--duration-base) var(--ease-standard); }
+.vx-overlay { position: fixed; inset: 0; z-index: 100; background: var(--surface-scrim); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; padding: var(--space-6); opacity: 0; transition: opacity var(--duration-base) var(--ease-standard); }
 .vx-overlay.is-open { opacity: 1; }
 .vx-overlay[hidden] { display: none; }
 .vx-overlay-panel { position: relative; width: 100%; background: var(--surface-card); border: 1px solid var(--line-structural); box-shadow: var(--shadow-overlay); max-height: 88vh; overflow-y: auto; transform: translateY(12px); transition: transform var(--duration-base) var(--ease-standard); padding: var(--space-10) var(--space-8); }

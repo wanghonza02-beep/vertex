@@ -60,7 +60,6 @@ html, body {
   z-index: 5;
   pointer-events: none;
   backdrop-filter: blur(7px);
-  -webkit-backdrop-filter: blur(7px);
   -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent 0%, transparent 40%, rgba(0,0,0,0.6) 70%, black 100%);
   mask-image: radial-gradient(circle at 50% 50%, transparent 0%, transparent 40%, rgba(0,0,0,0.6) 70%, black 100%);
 }
@@ -99,7 +98,6 @@ html, body {
   border: 1px solid rgba(237,232,221,0.18);
   background: rgba(21,23,26,0.62);
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   color: var(--paper-muted);
   font-family: var(--font-mono);
   font-size: 11px;
@@ -211,7 +209,6 @@ html, body {
   border: 1px solid rgba(237,232,221,0.18);
   background: rgba(21,23,26,0.62);
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   pointer-events: auto;
 }
 .webgl-nav-pill button { padding: 0 16px; height: 38px; background: none; border: 0; border-right: 1px solid rgba(237,232,221,0.12); color: var(--paper-muted); font-family: var(--font-mono); font-size: 11px; letter-spacing: var(--tracking-label); text-transform: uppercase; cursor: pointer; transition: var(--transition-control); }
@@ -276,7 +273,6 @@ html, body {
   padding: 110px var(--space-6) 100px;
   background: rgba(10,10,12,0.65);
   backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   opacity: 0;
   transform: translate3d(0, 10px, 0);
   pointer-events: none;

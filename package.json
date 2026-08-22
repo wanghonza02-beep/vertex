@@ -17,5 +17,10 @@
   "devDependencies": {
     "playwright": "^1.62.1",
     "vite": "^8.2.1"
-  }
+  },
+  "browserslist": [
+    "defaults",
+    "not IE 11",
+    "Safari >= 15"
+  ]
 }
