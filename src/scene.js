@@ -83,7 +83,11 @@ export async function initWebGLGrid(container, onCardActivate) {
   } catch (err) {
     return null;
   }
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isCoarsePointer ? 1.5 : 2));
+  // 1.0, not 1.5: reports of real stutter on touch GPUs mean 1.5x (2.25x
+  // the fill-rate of 1x) was still too heavy for this scene's 35 simultaneous
+  // card meshes plus 12 actively-decoding videos — dropping to native 1x
+  // resolution is the single biggest lever left for touch devices specifically.
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isCoarsePointer ? 1.0 : 2));
   renderer.setClearColor(0x000000, 0);
 
   const scene = new THREE.Scene();
@@ -211,6 +215,15 @@ export async function initWebGLGrid(container, onCardActivate) {
 
   function onPointerDown(e) {
     if (e.button !== undefined && e.button !== 0) return;
+    // Touch has no hover phase — the first event IS the tap location, with
+    // no preceding pointermove to have already run pickHover() the way a
+    // mouse's cursor motion does before every click. Without this, a pure
+    // tap-and-release on mobile always found hoveredSlot still null in
+    // onPointerUp below, since `dragging` (set true right below, before any
+    // pointermove) made every subsequent move event skip the hover check
+    // entirely. Running it here first fixes touch and is a harmless no-op
+    // for mouse, which usually already has this set from real hover anyway.
+    pickHover(e.clientX, e.clientY);
     dragging = true;
     captured = false;
     pointerId = e.pointerId;

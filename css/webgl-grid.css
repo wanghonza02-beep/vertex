@@ -1319,3 +1319,60 @@ html, body {
   .webgl-icon-btn { width: 34px; height: 34px; }
   .webgl-hint { font-size: 9px; text-align: center; }
 }
+
+/* ==========================================================================
+   Mobile LANDSCAPE — a phone on its side is wide but genuinely short
+   (~360-430px of actual height), a dimension none of the rules above ever
+   account for (they're all keyed on WIDTH, tuned for a tall narrow portrait
+   phone). At this height, .phi-headline/.consultation-title/.legal-title's
+   own vw-based clamps stay huge (vw doesn't know the viewport is short) and
+   swallow most of the visible area with a single heading line, and the
+   <700px back-button clearance above (190-250px, sized for a WRAPPED
+   3-row portrait chrome) is far more than a landscape phone's single-row
+   chrome actually needs. clamp(...,Nvh,...) below scales WITH the height
+   that's actually scarce here, instead of width, which isn't. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .webgl-chrome { padding: 8px 14px; gap: 6px; }
+  .webgl-brand img { width: 22px; height: 22px; }
+  .webgl-brand span { font-size: 16px; }
+  .webgl-pill, .webgl-nav-pill button { height: 26px; padding: 0 10px; font-size: 9px; }
+  .webgl-icon-btn { width: 26px; height: 26px; }
+  .webgl-hint { display: none; } /* "drag to orbit" — not worth the vertical space here */
+
+  .phi-headline { font-size: clamp(16px, 4.2vh, 28px); margin: 6px 0 8px; }
+  .consultation-title { font-size: clamp(20px, 5vh, 34px); margin: 6px 0 6px; }
+  .legal-title { font-size: clamp(16px, 4vh, 26px); margin: 4px 0 4px; }
+  .consultation-subtitle { margin-bottom: 12px; }
+  .phi-lead { font-size: 13px; line-height: 1.4; margin-bottom: 10px; }
+  .phi-body { font-size: 12px; line-height: 1.4; }
+
+  /* Back button sits much closer to the top edge than the wrapped-chrome
+     clearance above (this chrome stays one row at these widths, so it
+     doesn't need nearly as much) — but NOT flush with it: the logo sits at
+     the same left edge, one row tall (8px chrome padding + 22px logo here),
+     so top:12px alone would still put the button directly over the logo.
+     40px clears it (8+22+~10 gap). Scroll padding is still MORE than the
+     button's own top+height (40+26), not equal to it — same reasoning as
+     the <700px rules above: matching the button's top exactly still puts
+     the first line of content directly under it, just at smaller numbers. */
+  .consultation-back, .detail-back, .legal-back { top: 40px; }
+  .consultation-scroll, .detail-scroll, .legal-scroll { padding-top: 80px; }
+  .phi-scroll, .webgl-list-view { padding: 80px var(--space-4) 12px; }
+
+  /* Our Philosophy's process-shot videos: a tight single row instead of
+     wrapping into 2-3 stacked rows of tall 9:16 tiles — at this height
+     that stack alone would be several screens' worth of scroll before
+     reaching anything else. Height-driven sizing (not width/grid columns)
+     is what actually makes a 9:16-ratio tile short instead of tall. */
+  .phi-video-grid { display: flex; flex-wrap: nowrap; justify-content: center; gap: 6px; }
+  .phi-video-grid .phi-video-tile { width: auto; height: 96px; flex: 0 0 auto; }
+
+  /* The hero's OWN video is a separate element from the grid above and
+     still stacks full-width beneath the hero text at this width (the
+     <900px rule further up is keyed on width alone, same blind spot as
+     everything else in this section) — at landscape phone widths there's
+     actually enough horizontal room to keep it side-by-side, so it's the
+     one thing worth restoring rather than just shrinking in place. */
+  .phi-hero { grid-template-columns: 1.3fr 0.9fr; gap: var(--space-5); align-items: center; }
+  .phi-hero-video { max-width: none; max-height: 220px; width: auto; margin: 0; }
+}
