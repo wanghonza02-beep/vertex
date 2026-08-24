@@ -16,9 +16,15 @@ import { supabase } from './supabaseClient.js';
 // reason about which specific transition changed it, and both scene.js
 // methods are already idempotent no-ops if the state doesn't actually
 // change.
+// Same query as .rotate-gate's own CSS (css/site.css) — kept in sync here
+// only to pause/resume the render loop, since the gate's actual show/hide
+// is pure CSS and doesn't need this at all.
+const PORTRAIT_GATE_QUERY = '(max-width: 768px) and (orientation: portrait)';
+
 function syncGridPause(stage, gridRef) {
   if (!gridRef.current) return;
-  const shouldPause = stage.classList.contains('is-philosophy-view') || isCarDetailOpen() || isConsultationOpen() || isLegalOpen();
+  const shouldPause = stage.classList.contains('is-philosophy-view') || isCarDetailOpen() || isConsultationOpen() || isLegalOpen()
+    || window.matchMedia(PORTRAIT_GATE_QUERY).matches;
   if (shouldPause) gridRef.current.pause();
   else gridRef.current.resume();
 }
@@ -483,6 +489,10 @@ async function boot() {
     // or broken canvas visible, nor floating buttons hovering over one.
     canvas.hidden = false;
     stage.classList.add('is-webgl-active');
+    // Rotating the device fires this without a resize necessarily crossing
+    // any width breakpoint, so a plain window 'resize' listener alone
+    // wouldn't reliably catch every transition into/out of the gate.
+    window.matchMedia(PORTRAIT_GATE_QUERY).addEventListener('change', () => syncGridPause(stage, gridRef));
   } catch (err) {
     console.warn('[vertex] WebGL grid failed to start, falling back to the full 2D site.', err);
     canvas.hidden = true;

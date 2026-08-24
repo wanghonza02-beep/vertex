@@ -56,6 +56,11 @@ const TILE_COLS = 4;
 const TILE_ROWS = 3; // TILE_COLS * TILE_ROWS must equal FLEET_DATA.length — asserted below
 const DRAG_SENSITIVITY = 0.008;
 const FRICTION = 0.94;
+// The frame length every per-frame easing constant below (FRICTION, and the
+// two 0.09/0.16 lerp factors in tick()/updateGrid()) was tuned against —
+// see tick()'s own comment for why real elapsed time gets normalized
+// against this rather than assumed.
+const REF_FRAME_MS = 1000 / 60;
 
 function mod(n, m) { return ((n % m) + m) % m; }
 function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
@@ -130,6 +135,12 @@ export async function initWebGLGrid(container, onCardActivate) {
   // the same treatment, just from a second, independent trigger.
   let tabHidden = false;
   let rafId = null;
+  // Real elapsed time since the last tick(), used to make the inertia/
+  // reset-glide motion below frame-rate independent — null right after
+  // (re)starting the loop so that first tick treats itself as exactly one
+  // reference frame rather than computing a bogus dt against a stale
+  // timestamp from before the gap. See tick() for how it's used.
+  let lastTickTime = null;
 
   const raycaster = new THREE.Raycaster();
   const ndc = new THREE.Vector2();
@@ -151,7 +162,8 @@ export async function initWebGLGrid(container, onCardActivate) {
     if (hit.uv) { hoverU = hit.uv.x; hoverV = hit.uv.y; }
   }
 
-  function updateGrid() {
+  function updateGrid(dtScale) {
+    const liftFactor = 1 - Math.pow(1 - 0.16, dtScale); // see tick()'s comment on why this isn't just 0.16
     const centerCol = Math.round(panX / CELL_W);
     const centerRow = Math.round(panY / CELL_H);
     let idx = 0;
@@ -180,9 +192,9 @@ export async function initWebGLGrid(container, onCardActivate) {
         const targetLift = isHovered ? 1 : 0;
         const targetTiltX = isHovered ? (hoverV - 0.5) * -0.35 : 0;
         const targetTiltY = isHovered ? (hoverU - 0.5) * 0.35 : 0;
-        slot.lift = lerp(slot.lift, targetLift, 0.16);
-        slot.tiltX = lerp(slot.tiltX, targetTiltX, 0.16);
-        slot.tiltY = lerp(slot.tiltY, targetTiltY, 0.16);
+        slot.lift = lerp(slot.lift, targetLift, liftFactor);
+        slot.tiltX = lerp(slot.tiltX, targetTiltX, liftFactor);
+        slot.tiltY = lerp(slot.tiltY, targetTiltY, liftFactor);
 
         slot.mesh.position.set(x, y, z + slot.lift * 0.45);
         // +Math.PI on the horizontal (Y-axis) rotation channel — not the
@@ -264,7 +276,10 @@ export async function initWebGLGrid(container, onCardActivate) {
     rafId = null;
   }
   function startLoopIfActive() {
-    if (!destroyed && !paused && !tabHidden && rafId == null) rafId = requestAnimationFrame(tick);
+    if (!destroyed && !paused && !tabHidden && rafId == null) {
+      lastTickTime = null; // see its own declaration — avoids a bogus dt across the gap this loop was stopped for
+      rafId = requestAnimationFrame(tick);
+    }
   }
   function handleVisibilityChange() {
     if (document.hidden) {
@@ -279,25 +294,47 @@ export async function initWebGLGrid(container, onCardActivate) {
   }
   document.addEventListener('visibilitychange', handleVisibilityChange);
 
-  function tick() {
+  function tick(now) {
     if (destroyed || paused || tabHidden) return; // no reschedule here — resume()/handleVisibilityChange above restart the chain
+    // Every constant below (0.09, the literal 16, FRICTION) was originally
+    // tuned assuming a steady 60fps (~16.67ms/frame) and applied per-frame
+    // regardless of how much real time that frame actually spanned — fine
+    // at exactly 60Hz, but a 120Hz phone display calls tick() roughly twice
+    // as often per real second, so the same per-frame step covered half as
+    // much real time each call: panning inertia and the reset-glide both
+    // ran visibly faster (roughly 2x) than on a 60Hz display, and touch
+    // orbit felt twitchy rather than fluid. dtScale below normalizes every
+    // one of them against real elapsed time instead, so the feel this was
+    // tuned for at 60fps now holds at any refresh rate. Capped at 100ms so
+    // a stall (a dropped frame, a breakpoint, tab-switch jank) can't be
+    // read as "a lot of real time passed" and produce one huge jump.
+    const dt = lastTickTime != null ? Math.min(now - lastTickTime, 100) : REF_FRAME_MS;
+    lastTickTime = now;
+    const dtScale = dt / REF_FRAME_MS;
+
     if (!dragging && resetting) {
       // Eased glide back to the landing pan (0,0), not an instant snap.
-      panX = lerp(panX, 0, 0.09);
-      panY = lerp(panY, 0, 0.09);
+      const resetFactor = 1 - Math.pow(1 - 0.09, dtScale);
+      panX = lerp(panX, 0, resetFactor);
+      panY = lerp(panY, 0, resetFactor);
       if (Math.abs(panX) < 0.01 && Math.abs(panY) < 0.01) {
         panX = 0; panY = 0; resetting = false;
       }
     } else if (!dragging) {
-      panX += velX * 16 * DRAG_SENSITIVITY;
-      panY += velY * 16 * DRAG_SENSITIVITY;
-      velX *= FRICTION;
-      velY *= FRICTION;
+      // velX/velY are already a true per-millisecond velocity (set from
+      // real pointermove timing in onPointerMove below) — multiplying by
+      // the actual dt, not a fixed stand-in for "one frame," is what makes
+      // this correct at any frame rate.
+      panX += velX * dt * DRAG_SENSITIVITY;
+      panY += velY * dt * DRAG_SENSITIVITY;
+      const frictionFactor = Math.pow(FRICTION, dtScale);
+      velX *= frictionFactor;
+      velY *= frictionFactor;
       if (Math.abs(velX) < 0.0005) velX = 0;
       if (Math.abs(velY) < 0.0005) velY = 0;
     }
     cardSources.forEach(updateFleetCardFrame);
-    updateGrid();
+    updateGrid(dtScale);
     renderer.render(scene, camera);
     rafId = requestAnimationFrame(tick);
   }

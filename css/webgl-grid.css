@@ -568,13 +568,16 @@ html, body {
 .vx-footer-socials a:hover { color: var(--champagne-gold); border-color: var(--champagne-gold); }
 .vx-footer-socials svg, .vx-footer-socials i { width: 16px; height: 16px; }
 
-/* Box/background/border colors shared with .booking-demo-disclaimer live
-   further below (with the rest of the booking-flow styles); this one rule
-   stays here, ahead of this file's <700px footer-compaction block, so that
-   block's own margin/padding overrides actually win at mobile widths —
-   same base-before-override source order every other footer property in
-   this section already follows. */
-.vx-footer-disclaimer { margin: 40px 0 0; max-width: 640px; }
+/* Box/background/border/color are shared with .booking-demo-disclaimer
+   further below (with the rest of the booking-flow styles) — margin,
+   padding and font-size are NOT, even though that shared rule used to also
+   set all three: same specificity (one class each), so whichever comes
+   LAST in the file wins outright, and that shared rule sits much further
+   below this one and the <700px override further down — meaning it silently
+   won every time regardless of what either of those set, on every
+   viewport. Keeping margin/padding/font-size fully owned here (and in the
+   mobile override below) instead is what actually makes them stick. */
+.vx-footer-disclaimer { margin: 40px 0 0; padding: 16px 20px; font-size: 13px; max-width: 640px; }
 
 .vx-footer-divider { width: 100%; height: 1px; background: var(--line-faint); margin: 24px 0 24px; }
 
@@ -634,9 +637,10 @@ html, body {
   .vx-footer-divider { margin: 8px 0; }
   .vx-footer-bottom { padding-bottom: 8px; }
   /* The demo disclaimer box (added after the budget above was tuned) blew
-     right through it again — same fix in miniature: no top margin, tighter
-     padding, smaller/tighter text, same box. */
-  .vx-footer-disclaimer { margin-top: 0; padding: 8px 10px; font-size: 11px; line-height: 1.4; }
+     right through it again — same fix in miniature: tighter margin/padding,
+     smaller text, same box. Not 0 margin-top: sitting flush against the
+     newsletter form read as glued-on, not just "compact." */
+  .vx-footer-disclaimer { margin-top: 12px; padding: 10px 12px; font-size: 11px; line-height: 1.4; }
 }
 
 /* ==========================================================================
@@ -1117,10 +1121,15 @@ html, body {
 .booking-step-actions .webgl-pill svg { width: 14px; height: 14px; }
 .booking-step3 { display: flex; flex-direction: column; gap: var(--space-5); }
 .booking-demo-disclaimer, .vx-footer-disclaimer {
-  margin: 0; padding: var(--space-4) var(--space-5); background: var(--gold-wash);
+  background: var(--gold-wash);
   border: 1px solid var(--line-accent); border-radius: 2px;
-  font-family: var(--font-body); font-size: 13px; line-height: 1.6; color: var(--paper-white);
+  font-family: var(--font-body); line-height: 1.6; color: var(--paper-white);
 }
+/* margin/padding/font-size deliberately NOT shared above — see
+   .vx-footer-disclaimer's own rule for why: this one has no responsive
+   variation to lose to a later same-specificity rule, so owning its
+   spacing here directly is simplest for it specifically. */
+.booking-demo-disclaimer { margin: 0; padding: var(--space-4) var(--space-5); font-size: 13px; }
 .booking-demo-disclaimer strong, .vx-footer-disclaimer strong {
   color: var(--champagne-gold); text-transform: uppercase; letter-spacing: 0.04em;
 }
