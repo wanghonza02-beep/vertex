@@ -342,7 +342,7 @@ html, body {
      changes together claw back the ~126px difference so neither the
      heading (scrolled to the end) nor the last row (at rest) sits under
      the fixed chrome/toggle above and below it. */
-  .webgl-list-view { padding: 190px var(--space-4) 100px; }
+  .webgl-list-view { padding: 190px var(--space-4) 100px; backdrop-filter: blur(20px); }
   .webgl-list-brand { font-size: 13px; }
   /* 12px vertical, not 16px: still a 44px-tall tap target (12+12 padding +
      ~20px line height) — the minimum this project's touch-target audit
@@ -1153,6 +1153,27 @@ html, body {
      pages' copies of the same footer) are what actually get it to fit
      beneath one phone viewport's worth of scroll. */
   .consultation-scroll { padding: 250px var(--space-4) 24px; }
+
+  /* Booking Step 1: the 2-column calendar+times layout already stacks to
+     one column at <900px (above), but the calendar kept its full desktop
+     padding/cell/font sizes there — combined with a full times list right
+     beneath it, that pushed the first time slot well down the page before
+     a phone user could even reach it. Compacted here rather than at 900px:
+     tablets in the 700-900 range still have the horizontal room to show
+     the desktop sizing comfortably even while stacked. */
+  .booking-steps { margin-bottom: var(--space-5); }
+  .booking-step-num { width: 24px; height: 24px; font-size: 11px; }
+  .booking-step-line { width: 28px; }
+  .booking-calendar { padding: var(--space-4); }
+  .booking-cal-head { margin-bottom: var(--space-3); }
+  .booking-cal-weekdays { margin-bottom: 4px; }
+  .booking-cal-weekdays span { font-size: 9px; padding-bottom: 4px; }
+  .booking-cal-grid { row-gap: 2px; }
+  .booking-cal-day { font-size: 12px; }
+  .booking-times { gap: 6px; }
+  .booking-times-title { font-size: 12px; margin: 0 0 var(--space-2); }
+  .booking-slot-group { gap: 6px; margin-bottom: var(--space-3); }
+  .booking-slot { padding: 10px 14px; font-size: 12px; }
 }
 
 /* ==========================================================================
@@ -1313,9 +1334,17 @@ html, body {
   .webgl-chrome { padding: var(--space-4); gap: var(--space-4); }
   .webgl-chrome-row { flex-wrap: wrap; row-gap: var(--space-2); }
   .webgl-chrome-cluster { flex-wrap: wrap; row-gap: var(--space-2); }
-  .webgl-readout { display: none; }
-  .webgl-pill { height: 34px; padding: 0 12px; font-size: 10px; }
-  .webgl-nav-pill button { height: 34px; padding: 0 12px; font-size: 10px; }
+  /* Same height/padding/font-size as every other header pill — previously
+     display:none, but with .webgl-pill sized down to 34px here and the
+     clock's own default (38px, 14px padding, 10px font) left untouched,
+     any time it WAS visible (e.g. the landscape breakpoint below) it read
+     roughly twice as tall as its neighbors. Uniform sizing beats hiding it. */
+  /* .webgl-chrome-cluster .webgl-readout (two classes) outranks a bare
+     .webgl-readout in specificity, so this list must repeat that exact
+     compound selector — a plain .webgl-readout here would silently lose
+     to the base rule's 38px/14px-padding sizing regardless of source
+     order, the same trap noted on that base rule itself. */
+  .webgl-pill, .webgl-nav-pill button, .webgl-chrome-cluster .webgl-readout { height: 34px; padding: 0 12px; font-size: 10px; }
   .webgl-icon-btn { width: 34px; height: 34px; }
   .webgl-hint { font-size: 9px; text-align: center; }
 }
@@ -1335,7 +1364,7 @@ html, body {
   .webgl-chrome { padding: 8px 14px; gap: 6px; }
   .webgl-brand img { width: 22px; height: 22px; }
   .webgl-brand span { font-size: 16px; }
-  .webgl-pill, .webgl-nav-pill button { height: 26px; padding: 0 10px; font-size: 9px; }
+  .webgl-pill, .webgl-nav-pill button, .webgl-chrome-cluster .webgl-readout { height: 26px; padding: 0 10px; font-size: 9px; }
   .webgl-icon-btn { width: 26px; height: 26px; }
   .webgl-hint { display: none; } /* "drag to orbit" — not worth the vertical space here */
 
@@ -1345,6 +1374,15 @@ html, body {
   .consultation-subtitle { margin-bottom: 12px; }
   .phi-lead { font-size: 13px; line-height: 1.4; margin-bottom: 10px; }
   .phi-body { font-size: 12px; line-height: 1.4; }
+  /* Neither of these scales with height the way .consultation-title above
+     does (their own base rules are fixed px), so at the shallow end of that
+     clamp (20px) they could otherwise read AS BIG AS or bigger than the
+     hero title they sit under — sized here to stay clearly a step down at
+     every height in range. */
+  .consultation-card-title { font-size: 16px; }
+  .consultation-card-body { font-size: 12px; line-height: 1.4; }
+  .booking-times-title { font-size: 11px; }
+  .booking-step2-note { font-size: 12px; line-height: 1.4; }
 
   /* Back button sits much closer to the top edge than the wrapped-chrome
      clearance above (this chrome stays one row at these widths, so it

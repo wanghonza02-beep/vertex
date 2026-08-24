@@ -29,23 +29,6 @@
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 
-<!-- Mobile portrait gate: covers EVERYTHING (higher z-index than the WebGL
-     chrome, any open panel, all of it) whenever a narrow viewport is also
-     in portrait orientation. Pure CSS show/hide (see .rotate-gate's media
-     query in css/site.css) — no JS needed for the show-on-portrait/
-     dismiss-on-rotate behavior itself, since the media query re-evaluates
-     automatically on every orientation/resize change. src/main.js only
-     hooks the SAME query to pause/resume the WebGL render loop in sync,
-     since nothing behind this gate is ever visible while it's up. -->
-<div class="rotate-gate" data-rotate-gate aria-hidden="true">
-  <svg class="rotate-gate-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-    <rect x="7" y="2" width="10" height="20" rx="2"></rect>
-    <line x1="11" y1="18" x2="13" y2="18"></line>
-  </svg>
-  <p class="rotate-gate-title">Optimized for Horizontal Experience</p>
-  <p class="rotate-gate-sub">Please rotate your device to landscape mode to explore the Vertex 3D Fleet.</p>
-</div>
-
 <!-- The entire landing page: a fullscreen, fixed WebGL stage. This is the only
      thing a WebGL-capable visitor ever sees — no scroll, no sections beneath it.
      See README.md for why a full 2D site still exists (site-fallback below, and
