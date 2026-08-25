@@ -16,21 +16,17 @@ import { supabase } from './supabaseClient.js';
 // reason about which specific transition changed it, and both scene.js
 // methods are already idempotent no-ops if the state doesn't actually
 // change.
+// Same query as .rotate-gate's own CSS (css/site.css) — kept in sync here
+// only to pause/resume the render loop, since the gate's actual show/hide
+// is pure CSS and doesn't need this at all.
+const PORTRAIT_GATE_QUERY = '(max-width: 768px) and (orientation: portrait)';
+
 function syncGridPause(stage, gridRef) {
   if (!gridRef.current) return;
-  const shouldPause = stage.classList.contains('is-philosophy-view') || isCarDetailOpen() || isConsultationOpen() || isLegalOpen();
+  const shouldPause = stage.classList.contains('is-philosophy-view') || isCarDetailOpen() || isConsultationOpen() || isLegalOpen()
+    || window.matchMedia(PORTRAIT_GATE_QUERY).matches;
   if (shouldPause) gridRef.current.pause();
   else gridRef.current.resume();
-}
-
-// Touch/no-hover devices (phones, and touch tablets) — not a width check, so
-// rotating to landscape doesn't lift the restriction below. Reused wherever
-// "mobile" decisions need a single source of truth: List View is the only
-// mode these devices default to and can reach (3D Fleet is desktop-only —
-// see the mode-toggle handler in initChrome).
-const MOBILE_QUERY = '(hover: none), (pointer: coarse)';
-function isMobileDevice() {
-  return window.matchMedia(MOBILE_QUERY).matches;
 }
 
 /* Bootstraps the fullscreen WebGL portfolio grid and its floating chrome — the
@@ -149,40 +145,10 @@ function initChrome(stage, gridRef) {
   // faded in/out via .is-list-view on .webgl-stage (css/webgl-grid.css).
   const modeButtons = chrome.querySelectorAll('[data-mode-toggle]');
   const listView = stage.querySelector('[data-list-view]');
-
-  // Mobile always starts in — and the "3D Fleet" button below can never
-  // leave — List View: the interactive orbit/drag grid is a desktop-only
-  // experience, though the same canvas keeps rendering underneath as a
-  // blurred ambient backdrop (see .webgl-list-view's backdrop-filter and
-  // syncGridPause above, which never pauses for List View). Set directly
-  // rather than via modeButtons[i].click() — nothing else is open yet at
-  // boot, so there's no other panel-closing/pause work the click handler
-  // below would otherwise need to do.
-  if (isMobileDevice()) {
-    modeButtons.forEach((b) => {
-      const isList = b.getAttribute('data-mode-toggle') === 'list';
-      b.classList.toggle('is-active', isList);
-      b.setAttribute('aria-pressed', String(isList));
-    });
-    stage.classList.add('is-list-view');
-    if (listView) listView.setAttribute('aria-hidden', 'false');
-  }
-
   modeButtons.forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       const mode = btn.getAttribute('data-mode-toggle');
-      // "3D Fleet" stays visible on mobile (so the option is legible, not
-      // just missing) but tapping it never actually switches modes — a
-      // toast explains why instead. List View's own button is unaffected,
-      // since that's the one mode mobile can already reach.
-      if (mode === 'grid' && isMobileDevice()) {
-        window.VertexToast && window.VertexToast.show(
-          'EXCLUSIVELY FOR DESKTOP — Please open Vertex on a desktop browser to experience interactive 3D Fleet exploration.',
-          'neutral'
-        );
-        return;
-      }
       closeCarDetail(stage); // same reasoning as the section tabs above
       closeConsultation(stage);
       closeLegal(stage);
@@ -523,6 +489,10 @@ async function boot() {
     // or broken canvas visible, nor floating buttons hovering over one.
     canvas.hidden = false;
     stage.classList.add('is-webgl-active');
+    // Rotating the device fires this without a resize necessarily crossing
+    // any width breakpoint, so a plain window 'resize' listener alone
+    // wouldn't reliably catch every transition into/out of the gate.
+    window.matchMedia(PORTRAIT_GATE_QUERY).addEventListener('change', () => syncGridPause(stage, gridRef));
   } catch (err) {
     console.warn('[vertex] WebGL grid failed to start, falling back to the full 2D site.', err);
     canvas.hidden = true;

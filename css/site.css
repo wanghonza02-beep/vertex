@@ -391,14 +391,51 @@ html.has-custom-cursor input, html.has-custom-cursor textarea, html.has-custom-c
 .vx-lightbox-label { position: absolute; left: var(--space-4); bottom: var(--space-4); font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--paper-white); background: rgba(11,12,14,.72); border: 1px solid var(--line-structural); padding: 6px 10px; }
 
 /* ---- Toast ---- */
-/* max-width/line-height/text-align added alongside the new "3D Fleet is
-   desktop-only" mobile message (see src/main.js's mode-toggle handler) —
-   every prior caller passed a short 2-3 word message, so an unconstrained
-   inline-flex box never had a reason to wrap; a full sentence without a
-   cap just grew as wide as its shrink-to-fit intrinsic width allowed. */
+/* max-width/line-height/text-align: every caller used to pass a short 2-3
+   word message, so an unconstrained inline-flex box never had a reason to
+   wrap; a longer, full-sentence message without a cap just grows as wide
+   as its shrink-to-fit intrinsic width allows. Kept general rather than
+   scoped to one caller's message. */
 .vx-toast { position: fixed; left: 50%; bottom: var(--space-10); transform: translate(-50%, 12px); display: inline-flex; align-items: center; gap: var(--space-3); max-width: 360px; text-align: left; line-height: 1.5; background: var(--surface-raised); border: 1px solid var(--line-structural); border-left: 2px solid var(--champagne-gold); padding: var(--space-4) var(--space-5); box-shadow: var(--shadow-lift); font-family: var(--font-mono); font-size: var(--size-label-sm); letter-spacing: .08em; text-transform: uppercase; color: var(--paper-white); z-index: 200; opacity: 0; pointer-events: none; transition: opacity var(--duration-base) var(--ease-standard), transform var(--duration-base) var(--ease-standard); }
 .vx-toast.is-visible { opacity: 1; transform: translate(-50%, 0); }
 @media (max-width: 700px) {
   .vx-toast { max-width: calc(100vw - 48px); font-size: 10px; padding: var(--space-3) var(--space-4); }
 }
 
+/* ---- Mobile portrait gate ----
+   Hidden by default (desktop, or any viewport already in landscape); the
+   media query below is the ONLY thing that ever shows it, and it's a pure
+   CSS show/hide — the browser re-evaluates it automatically on every
+   resize/orientation change, so rotating to landscape dismisses this with
+   no JS involved. z-index sits above .webgl-chrome (10) and every panel in
+   css/webgl-grid.css (max 9), so it truly blocks everything underneath,
+   not just the WebGL canvas. src/main.js listens for the identical query
+   only to pause/resume the WebGL render loop in step — nothing behind this
+   gate is ever visible while it's up. */
+.rotate-gate {
+  display: none;
+  position: fixed; inset: 0; z-index: 1000;
+  flex-direction: column; align-items: center; justify-content: center; gap: var(--space-5);
+  padding: var(--space-8);
+  background: rgba(11,12,14,0.97);
+  text-align: center;
+  touch-action: none;
+}
+@media (max-width: 768px) and (orientation: portrait) {
+  .rotate-gate { display: flex; }
+}
+.rotate-gate-icon {
+  width: 56px; height: 56px; color: var(--champagne-gold);
+  animation: rotate-gate-hint 1.8s ease-in-out infinite;
+}
+@keyframes rotate-gate-hint {
+  0%, 15% { transform: rotate(0deg); }
+  50%, 65% { transform: rotate(-90deg); }
+  100% { transform: rotate(-90deg); }
+}
+@media (prefers-reduced-motion: reduce) { .rotate-gate-icon { animation: none; transform: rotate(-90deg); } }
+.rotate-gate-title {
+  font-family: var(--font-mono); font-size: 13px; letter-spacing: var(--tracking-label); text-transform: uppercase;
+  color: var(--champagne-gold); max-width: 320px; margin: 0;
+}
+.rotate-gate-sub { font-family: var(--font-body); font-size: 14px; line-height: 1.6; color: var(--paper-muted); max-width: 320px; margin: 0; }

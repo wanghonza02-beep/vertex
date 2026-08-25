@@ -83,12 +83,11 @@ export async function initWebGLGrid(container, onCardActivate) {
   } catch (err) {
     return null;
   }
-  // Same cap as desktop (2x) regardless of pointer type — mobile no longer
-  // needs its own degraded resolution tier now that phones default to (and
-  // "3D Fleet" is locked to) List View, where this canvas only ever shows
-  // as a heavily CSS-blurred ambient backdrop (see .webgl-list-view in
-  // css/webgl-grid.css) rather than the sharp, fully interactive grid.
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  // 1.0, not 1.5: reports of real stutter on touch GPUs mean 1.5x (2.25x
+  // the fill-rate of 1x) was still too heavy for this scene's 35 simultaneous
+  // card meshes plus 12 actively-decoding videos — dropping to native 1x
+  // resolution is the single biggest lever left for touch devices specifically.
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isCoarsePointer ? 1.0 : 2));
   renderer.setClearColor(0x000000, 0);
 
   const scene = new THREE.Scene();
