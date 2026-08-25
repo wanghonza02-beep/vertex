@@ -1394,8 +1394,14 @@ html, body {
   .webgl-icon-btn { width: 26px; height: 26px; }
   .webgl-hint { display: none; } /* "drag to orbit" — not worth the vertical space here */
 
-  .phi-headline { font-size: clamp(16px, 4.2vh, 28px); margin: 6px 0 8px; }
-  .consultation-title { font-size: clamp(20px, 5vh, 34px); margin: 6px 0 6px; }
+  /* Bumped floor+vh coefficient on both of these — on a real device (as
+     opposed to this query's own headless-emulator testing ground) the
+     visible height this clamp resolves against is further reduced by
+     Safari/Chrome's own address bar, which routinely left both headings
+     reading barely larger than the body copy beneath them despite the
+     clamp technically doing its job. */
+  .phi-headline { font-size: clamp(22px, 5.5vh, 34px); margin: 6px 0 8px; }
+  .consultation-title { font-size: clamp(28px, 6.5vh, 42px); margin: 6px 0 6px; }
   .legal-title { font-size: clamp(16px, 4vh, 26px); margin: 4px 0 4px; }
   .consultation-subtitle { margin-bottom: 12px; }
   .phi-lead { font-size: 13px; line-height: 1.4; margin-bottom: 10px; }
@@ -1423,22 +1429,89 @@ html, body {
   .consultation-scroll, .detail-scroll, .legal-scroll { padding-top: 80px; }
   .phi-scroll, .webgl-list-view { padding: 80px var(--space-4) 12px; }
 
-  /* Our Philosophy's process-shot videos: a tight single row instead of
-     wrapping into 2-3 stacked rows of tall 9:16 tiles — at this height
-     that stack alone would be several screens' worth of scroll before
-     reaching anything else. Height-driven sizing (not width/grid columns)
-     is what actually makes a 9:16-ratio tile short instead of tall. */
-  .phi-video-grid { display: flex; flex-wrap: nowrap; justify-content: center; gap: 6px; }
-  .phi-video-grid .phi-video-tile { width: auto; height: 96px; flex: 0 0 auto; }
+  /* Our Philosophy's process-shot videos: reverted from a height-capped
+     (96px) flex row back to the desktop grid's own width-driven sizing
+     (repeat(5,1fr), aspect-ratio 9/16 following from THAT width) — the
+     height cap left tiles ~54px wide, nowhere near enough for their own
+     captions ("Strip to bare metal", "Engineer the powertrain") without
+     truncating mid-word. Landscape phones have the horizontal room desktop
+     does; the <900px rule above (2 columns) never accounted for that. */
+  .phi-video-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
 
   /* The hero's OWN video is a separate element from the grid above and
      still stacks full-width beneath the hero text at this width (the
      <900px rule further up is keyed on width alone, same blind spot as
      everything else in this section) — at landscape phone widths there's
      actually enough horizontal room to keep it side-by-side, so it's the
-     one thing worth restoring rather than just shrinking in place. */
-  .phi-hero { grid-template-columns: 1.3fr 0.9fr; gap: var(--space-5); align-items: center; }
-  .phi-hero-video { max-width: none; max-height: 220px; width: auto; margin: 0; }
+     one thing worth restoring rather than just shrinking in place.
+
+     align-items: stretch (the grid default — center was overriding it),
+     deliberately with NO explicit height/min-height on .phi-hero itself:
+     a viewport-relative height was tried here first and had to be reverted
+     — CSS Grid ignores a percentage-height item's own size when computing
+     an auto row's intrinsic height, so .phi-hero-video's height:100% below
+     contributed ~nothing to sizing the row, and the row's own forced
+     min-height didn't grow to match the (frequently taller) text column —
+     confirmed directly: the text visibly overflowed past the row's bottom
+     edge into whatever section came next. Leaving the row unset lets it
+     auto-size from the text column's natural content height instead (the
+     ONLY thing actually contributing to that row's intrinsic size once the
+     video's height is percentage-based), and the video's height:100% then
+     resolves against that now-definite row height — matching it exactly,
+     never taller, by construction rather than by an assumed budget.
+     aspect-ratio: auto overrides the base 9:16 ratio for this one video:
+     with the row's height coming from the TEXT side rather than the video
+     dictating its own height from that ratio, keeping 9:16 would fight the
+     stretch instead of filling the box; object-fit: cover on the <video>
+     itself (shared base rule) is what keeps the footage looking intentional
+     rather than squashed at whatever ratio the box ends up being. */
+  .phi-hero { grid-template-columns: 1.3fr 0.9fr; gap: var(--space-5); align-items: stretch; }
+  .phi-hero-text { display: flex; flex-direction: column; justify-content: center; }
+  .phi-hero-video { aspect-ratio: auto; max-width: none; max-height: none; width: 100%; height: 100%; margin: 0; }
+
+  /* Stat row: 2x2 grid reads as cramped once it's confined to the hero's
+     own ~1.3fr text column rather than the page's full width — one flex
+     row instead lets all 4 items sit on a single line, sized down enough
+     (default 26px/10px figures were tuned for a much wider desktop column)
+     to actually fit that column without wrapping. */
+  .phi-stats { display: flex; flex-direction: row; justify-content: space-between; gap: 10px; }
+  .phi-stat { flex: 1 1 0; min-width: 0; padding-top: 6px; }
+  .phi-stat-figure { font-size: 18px; }
+  .phi-stat-figure small { font-size: 9px; }
+  .phi-stat-label { font-size: 8px; }
+
+  /* Booking Step 1: the 2-column calendar+times layout stacks to 1 column
+     under 900px width (see .booking-step1's own <900px rule) — every
+     landscape phone falls under that width threshold despite having
+     plenty of it to spare, which is what forced scrolling past the whole
+     calendar to reach a selected date's time slots. Restored side-by-side
+     specifically for landscape, with its own compact sizing layered on
+     top (the existing <700px compaction is a WIDTH query, and landscape
+     phones here are almost all wider than 700px, so it never applied). */
+  .booking-step1 { grid-template-columns: 1.05fr 0.95fr; gap: var(--space-4); }
+  .booking-calendar { padding: 10px; }
+  .booking-cal-head { margin-bottom: 6px; }
+  .booking-cal-month { font-size: 11px; }
+  .booking-cal-weekdays { margin-bottom: 2px; }
+  .booking-cal-weekdays span { font-size: 8px; padding-bottom: 2px; }
+  .booking-cal-grid { row-gap: 1px; }
+  .booking-cal-day { font-size: 10px; }
+  .booking-times { gap: 4px; }
+  .booking-slot-group { gap: 4px; margin-bottom: 6px; }
+  .booking-slot { padding: 6px 10px; font-size: 10px; }
+
+  /* Wordmark reads redundant next to the brand logo already fixed at the
+     top of every page for the whole time the footer's on screen — desktop
+     keeps it (there's room to spare there); landscape phones don't. */
+  .vx-footer-logo { display: none; }
+
+  /* iOS Safari rubber-bands (bounces past, then snaps back) any
+     overflow-y:auto container by default, most noticeable landing right
+     at the end of a scroll — every one of this stage's own scrollable
+     panels gets the same fix. */
+  .phi-scroll, .detail-scroll, .consultation-scroll, .legal-scroll, .webgl-list-view, .site-fallback {
+    overscroll-behavior-y: none;
+  }
 }
 
 /* A second, stricter tier nested inside the one above — iPhone 13 Mini
