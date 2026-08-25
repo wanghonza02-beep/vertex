@@ -405,7 +405,12 @@ html, body {
    for this 2-column hero split rather than a full-width single hero.
    Color stays --paper-white on purpose: only the font was asked for here,
    not the gold/red treatment the other two tech headlines carry. */
-.phi-headline { font-family: var(--font-tech); font-weight: var(--weight-tech); font-size: var(--size-display-tech); line-height: var(--leading-tech); letter-spacing: var(--tracking-tech); text-transform: uppercase; color: var(--paper-white); margin: var(--space-3) 0 var(--space-5); }
+/* color: var(--corsa-red), not --paper-white — this is the one Our
+   Philosophy headline red is scoped onto, the same rationed-accent
+   treatment .webgl-pill--primary/.consultation-cta already give it
+   elsewhere (see colors.css: --corsa-red is this brand's actual red
+   token; there is no separate "--color-red-accent" variable). */
+.phi-headline { font-family: var(--font-tech); font-weight: var(--weight-tech); font-size: var(--size-display-tech); line-height: var(--leading-tech); letter-spacing: var(--tracking-tech); text-transform: uppercase; color: var(--corsa-red); margin: var(--space-3) 0 var(--space-5); }
 .phi-lead { font-family: var(--font-luxury); font-size: 19px; line-height: 1.5; color: var(--paper-white); max-width: var(--measure-text); margin-bottom: var(--space-4); }
 .phi-hero-text .phi-body { margin-bottom: var(--space-6); }
 
@@ -1210,14 +1215,14 @@ html, body {
 }
 .legal-back svg { width: 14px; height: 14px; }
 
-/* Consultation/Detail/Legal back pills all fade out once their panel's own
-   scroll container has moved more than a few px, and back in near the top
-   — see bindBackButtonScrollFade (src/panelReveal.js) for why: each pill
-   is fixed at one screen position regardless of scroll depth, so without
-   this it stays parked on top of whatever content passes underneath it,
-   worst case the footer's own newsletter input. */
-.consultation-back, .detail-back, .legal-back { transition: opacity var(--duration-fast) var(--ease-standard); }
-.consultation-back.is-scrolled-past, .detail-back.is-scrolled-past, .legal-back.is-scrolled-past { opacity: 0; pointer-events: none; }
+/* Consultation/Detail/Legal back pills must stay visible and clickable at
+   every scroll depth (previously faded out past a 32px scroll threshold —
+   see the now-removed bindBackButtonScrollFade in src/panelReveal.js — to
+   avoid sitting on top of scrolled content like the footer's newsletter
+   input; permanent visibility/access wins over that collision concern).
+   Each is already position:absolute against its panel's non-scrolling
+   shell, not the inner scroll container, so no positioning change is
+   needed here — only removing the opacity toggle that used to hide it. */
 /* Same reasoning as .detail-back/.consultation-back's own matching rule:
    .webgl-pill's pointer-events:auto would otherwise leave this button
    clickable at its fixed screen position even while its own panel is

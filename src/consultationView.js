@@ -1,4 +1,4 @@
-import { observeReveal, resetStatFigure, bindBackButtonScrollFade } from './panelReveal.js';
+import { observeReveal, resetStatFigure } from './panelReveal.js';
 import {
   WEEKDAY_LABELS, FLEET_BLOCKS, BESPOKE_BLOCK, LOCATIONS,
   dateKey, isSameDay, startOfToday, addMonths, formatMonthYear, formatShortDate, buildMonthGrid,
@@ -352,7 +352,6 @@ export function initConsultationView(stage) {
   const view = stage.querySelector('[data-consultation-view]');
   if (!view) return;
   window.VertexIcons && window.VertexIcons.refresh(view);
-  bindBackButtonScrollFade(view.querySelector('[data-consultation-scroll]'), view.querySelector('[data-consultation-back]'));
 
   const container = view.querySelector('[data-booking-step-body]');
   if (!container) return;

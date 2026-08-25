@@ -108,26 +108,6 @@ export function observeStatCounters(root, els) {
    triggers the FIRST play, at its own (tighter) threshold. A wide rootMargin
    (50% of the panel's height past each edge) avoids pause/resume thrashing
    from small scroll jitters right at the boundary. */
-/* Consultation/Detail/Legal's "back" pills are all position:absolute
-   against the whole (non-scrolling) panel, not against their own panel's
-   inner scroll container — so each stays at one fixed screen position no
-   matter how far that inner content has scrolled. That's fine at the top
-   of a page (there's normally nothing else up there to collide with), but
-   a visitor scrolled deep into the page — e.g. Consultation's own footer
-   copy — finds it parked on top of whatever content happens to land at
-   that same height, worst case directly over the footer's newsletter
-   input. Fading it out past a small scroll threshold (and back in near the
-   top) sidesteps that without needing pixel-exact padding math for every
-   possible scroll depth. Bound once against the panel's persistent scroll
-   element and back button (both survive every open/close), not re-bound
-   per open. */
-export function bindBackButtonScrollFade(root, backBtn, threshold = 32) {
-  if (!root || !backBtn) return;
-  const update = () => backBtn.classList.toggle('is-scrolled-past', root.scrollTop > threshold);
-  root.addEventListener('scroll', update, { passive: true });
-  update();
-}
-
 export function observeVideoLifecycle(root, containers) {
   const withVideo = containers.filter((el) => el.querySelector('video'));
   if (!withVideo.length || typeof IntersectionObserver !== 'function') return null;

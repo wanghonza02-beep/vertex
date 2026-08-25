@@ -1,4 +1,4 @@
-import { observeReveal, bindBackButtonScrollFade } from './panelReveal.js';
+import { observeReveal } from './panelReveal.js';
 
 /* Privacy Policy / Terms of Service / Cookie Settings — three lightweight
    static pages sharing one panel shell (.webgl-legal-view), the same
@@ -124,5 +124,4 @@ export function initLegalView(stage) {
   const view = stage.querySelector('[data-legal-view]');
   if (!view) return;
   window.VertexIcons && window.VertexIcons.refresh(view);
-  bindBackButtonScrollFade(view.querySelector('[data-legal-scroll]'), view.querySelector('[data-legal-back]'));
 }

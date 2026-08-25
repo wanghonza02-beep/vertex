@@ -1,5 +1,5 @@
 import mediaManifest from 'virtual:car-media';
-import { observeReveal, observeVideoLifecycle, bindBackButtonScrollFade } from './panelReveal.js';
+import { observeReveal, observeVideoLifecycle } from './panelReveal.js';
 
 /* The car detail page — a fourth full-panel view inside #webglStage, sitting
    at a HIGHER z-index (8) than both the 3D grid (canvas, z-index 1) and List
@@ -186,5 +186,4 @@ export function initDetailView(stage) {
   const view = stage.querySelector('[data-detail-view]');
   if (!view) return;
   window.VertexIcons && window.VertexIcons.refresh(view);
-  bindBackButtonScrollFade(view.querySelector('[data-detail-scroll]'), view.querySelector('[data-detail-back]'));
 }
