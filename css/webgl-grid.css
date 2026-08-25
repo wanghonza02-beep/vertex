@@ -25,7 +25,14 @@ html, body {
   position: fixed;
   inset: 0;
   width: 100vw;
-  height: 100vh;
+  height: 100vh; /* fallback for browsers that don't parse dvh at all — the
+    line below wins wherever it's supported, never both at once */
+  height: 100dvh; /* 100vh is the LARGEST possible mobile viewport (browser
+    chrome retracted) — on a real phone with its address bar/gesture bar
+    still showing, that overshoots the actual visible height, so a
+    space-between row pinned via inset:0 (the bottom chrome row included)
+    can end up positioned below the real fold even though it measures fine
+    against 100vh. dvh tracks whatever's actually visible right now. */
   z-index: 10;
   background: transparent;
   pointer-events: none; /* see .is-webgl-active below: until the scene is confirmed
@@ -1313,6 +1320,7 @@ html, body {
   position: fixed;
   inset: 0;
   height: 100vh;
+  height: 100dvh; /* see .webgl-stage's matching pair for why */
   overflow-y: auto;
   overflow-x: hidden;
   background: var(--vertex-black);
@@ -1366,7 +1374,20 @@ html, body {
    chrome actually needs. clamp(...,Nvh,...) below scales WITH the height
    that's actually scarce here, instead of width, which isn't. */
 @media (orientation: landscape) and (max-height: 500px) {
-  .webgl-chrome { padding: 8px 14px; gap: 6px; }
+  /* Longhand, not the old `padding: 8px 14px` shorthand — env(safe-area-
+     inset-*) adds the notch/home-indicator/gesture-bar reserve on top of
+     the base 8/14px on whichever edges the OS actually reports one for
+     (0px, a no-op, everywhere else), so the bottom .webgl-chrome-row
+     (the 3D Fleet/List View + Fleet/Our Philosophy switcher pills) never
+     ends up sitting UNDER a home-indicator gesture area that can swallow
+     its taps even where the pills themselves are still visually clear of it. */
+  .webgl-chrome {
+    padding-top: calc(8px + env(safe-area-inset-top, 0px));
+    padding-right: calc(14px + env(safe-area-inset-right, 0px));
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    padding-left: calc(14px + env(safe-area-inset-left, 0px));
+    gap: 6px;
+  }
   .webgl-brand img { width: 22px; height: 22px; }
   .webgl-brand span { font-size: 16px; }
   .webgl-pill, .webgl-nav-pill button, .webgl-chrome-cluster .webgl-readout { height: 26px; padding: 0 10px; font-size: 9px; }
@@ -1418,4 +1439,26 @@ html, body {
      one thing worth restoring rather than just shrinking in place. */
   .phi-hero { grid-template-columns: 1.3fr 0.9fr; gap: var(--space-5); align-items: center; }
   .phi-hero-video { max-width: none; max-height: 220px; width: auto; margin: 0; }
+}
+
+/* A second, stricter tier nested inside the one above — iPhone 13 Mini
+   landscape (327px) and similarly small phones sit meaningfully shorter
+   than the ~342-390px the 500px tier was tuned against, and adding the
+   safe-area-inset padding just above eats further into that already-thin
+   margin. Everything here is on top of, not instead of, the 500px tier's
+   own rules (later in the cascade = wins on the properties it repeats;
+   properties it doesn't touch — the back-button/scroll-padding geometry,
+   the philosophy video row, etc. — fall through to that tier unchanged). */
+@media (orientation: landscape) and (max-height: 420px) {
+  .webgl-chrome {
+    padding-top: calc(6px + env(safe-area-inset-top, 0px));
+    padding-right: calc(10px + env(safe-area-inset-right, 0px));
+    padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+    padding-left: calc(10px + env(safe-area-inset-left, 0px));
+    gap: 4px;
+  }
+  .webgl-brand img { width: 18px; height: 18px; }
+  .webgl-brand span { font-size: 14px; }
+  .webgl-pill, .webgl-nav-pill button, .webgl-chrome-cluster .webgl-readout { height: 22px; padding: 0 8px; font-size: 8px; }
+  .webgl-icon-btn { width: 22px; height: 22px; }
 }

@@ -80,7 +80,7 @@ function drawMetaBar(ctx, entry) {
   ctx.fillText(entry.model, W - 16, midY);
 }
 
-function buildOneSource(entry) {
+function buildOneSource(entry, maxAnisotropy) {
   const canvas = document.createElement('canvas');
   canvas.width = W;
   canvas.height = H;
@@ -131,16 +131,22 @@ function buildOneSource(entry) {
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 4;
+  // The renderer's own max, not a hardcoded guess — cards are viewed at a
+  // steep raking angle whenever the grid is panned off-center, and
+  // anisotropic filtering is what keeps the brand/model text and the
+  // blueprint-fallback's ruled lines from smearing into mush at that angle
+  // (plain mip-mapping alone blurs isotropically, ignoring that the
+  // view-angle compression is much worse along one axis than the other).
+  texture.anisotropy = maxAnisotropy;
   source.texture = texture;
   return source;
 }
 
-export async function buildFleetCardSources() {
+export async function buildFleetCardSources(maxAnisotropy) {
   if (document.fonts && document.fonts.ready) {
     try { await document.fonts.ready; } catch (err) { /* draw with fallback monospace */ }
   }
-  return FLEET_DATA.map(buildOneSource);
+  return FLEET_DATA.map((entry) => buildOneSource(entry, maxAnisotropy));
 }
 
 export function updateFleetCardFrame(source) {

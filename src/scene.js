@@ -83,11 +83,14 @@ export async function initWebGLGrid(container, onCardActivate) {
   } catch (err) {
     return null;
   }
-  // 1.0, not 1.5: reports of real stutter on touch GPUs mean 1.5x (2.25x
-  // the fill-rate of 1x) was still too heavy for this scene's 35 simultaneous
-  // card meshes plus 12 actively-decoding videos — dropping to native 1x
-  // resolution is the single biggest lever left for touch devices specifically.
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isCoarsePointer ? 1.0 : 2));
+  // Native device resolution (capped at 2x, same ceiling as desktop) for
+  // every pointer type — a lower touch-specific cap was tried twice before
+  // this and reverted twice: it reads as genuinely blurry cards/outlines/
+  // labels on any real high-DPR phone (most are 3x), which cost more in
+  // perceived quality than the fill-rate it saved. If a future low-end
+  // device profile needs its own tier again, it should be re-added as an
+  // explicit, narrowly-scoped exception rather than a blanket touch cap.
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.setClearColor(0x000000, 0);
 
   const scene = new THREE.Scene();
@@ -97,7 +100,7 @@ export async function initWebGLGrid(container, onCardActivate) {
   scene.add(new THREE.AmbientLight(0xffffff, 1.7));
 
   console.assert(TILE_COLS * TILE_ROWS === FLEET_DATA.length, '[vertex] TILE_COLS x TILE_ROWS must equal FLEET_DATA.length or the tiling modulo math indexes out of bounds');
-  const cardSources = await buildFleetCardSources();
+  const cardSources = await buildFleetCardSources(renderer.capabilities.getMaxAnisotropy());
   const textures = cardSources.map((s) => s.texture);
   const geometry = new THREE.PlaneGeometry(CARD_W, CARD_H);
 
